@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Journey Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WhatsApp Journey Generator</h1>
+            <p class="subtitle">Generate multi-model journey visualizations from your prompt</p>
+        </header>
+
+        <main>
+            <form id="generateForm">
+                <div class="form-group">
+                    <label for="promptFile">Upload Prompt File (.md)</label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="promptFile" name="prompt_file" accept=".md" required>
+                        <div class="file-upload-text">
+                            <span class="file-icon">📄</span>
+                            <span class="file-text">Click to upload or drag and drop</span>
+                            <span class="file-name" id="fileName"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="scenario">Scenario Description</label>
+                    <input type="text" id="scenario" name="scenario" placeholder="e.g., Lifetime ISA for UK Police, 25-40, UK, WATI journeys" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Models (1-3 models)</label>
+                    <div id="modelsList" class="models-list">
+                        <div class="loading">Loading models...</div>
+                    </div>
+                    <div class="model-count" id="modelCount">0 models selected</div>
+                </div>
+
+                <button type="submit" id="generateBtn" class="btn-primary" disabled>
+                    <span class="btn-text">Generate Journeys</span>
+                    <span class="btn-spinner" id="spinner" style="display: none;">⏳</span>
+                </button>
+            </form>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+        </main>
+    </div>
+
+    <script>
+        let selectedModels = [];
+        const maxModels = 3;
+
+        // Load models on page load
+        fetch('/api/models')
+            .then(response => response.json())
+            .then(models => {
+                const modelsList = document.getElementById('modelsList');
+                modelsList.innerHTML = '';
+                models.forEach(model => {
+                    const checkbox = document.createElement('div');
+                    checkbox.className = 'model-checkbox';
+                    checkbox.innerHTML = `
+                        <input type="checkbox" id="model-${model.id}" value="${model.id}" 
+                               onchange="handleModelChange('${model.id}', this.checked)">
+                        <label for="model-${model.id}">
+                            <strong>${model.name}</strong>
+                            <span class="provider">${model.provider}</span>
+                        </label>
+                    `;
+                    modelsList.appendChild(checkbox);
+                });
+            })
+            .catch(error => {
+                document.getElementById('modelsList').innerHTML = 
+                    '<div class="error">Failed to load models. Please refresh the page.</div>';
+            });
+
+        function handleModelChange(modelId, checked) {
+            if (checked) {
+                if (selectedModels.length >= maxModels) {
+                    document.getElementById(`model-${modelId}`).checked = false;
+                    alert(`Maximum ${maxModels} models allowed`);
+                    return;
+                }
+                selectedModels.push(modelId);
+            } else {
+                selectedModels = selectedModels.filter(id => id !== modelId);
+            }
+            updateModelCount();
+            updateGenerateButton();
+        }
+
+        function updateModelCount() {
+            const count = selectedModels.length;
+            document.getElementById('modelCount').textContent = 
+                `${count} model${count !== 1 ? 's' : ''} selected`;
+        }
+
+        function updateGenerateButton() {
+            const fileInput = document.getElementById('promptFile');
+            const scenarioInput = document.getElementById('scenario');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            const hasFile = fileInput.files.length > 0;
+            const hasScenario = scenarioInput.value.trim().length > 0;
+            const hasModels = selectedModels.length > 0 && selectedModels.length <= maxModels;
+            
+            generateBtn.disabled = !(hasFile && hasScenario && hasModels);
+        }
+
+        // File upload handling
+        const fileInput = document.getElementById('promptFile');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileName = document.getElementById('fileName');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileName.textContent = e.target.files[0].name;
+                fileUploadArea.classList.add('has-file');
+            } else {
+                fileName.textContent = '';
+                fileUploadArea.classList.remove('has-file');
+            }
+            updateGenerateButton();
+        });
+
+        // Drag and drop
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                fileName.textContent = e.dataTransfer.files[0].name;
+                fileUploadArea.classList.add('has-file');
+                updateGenerateButton();
+            }
+        });
+
+        // Scenario input
+        document.getElementById('scenario').addEventListener('input', updateGenerateButton);
+
+        // Form submission
+        document.getElementById('generateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('prompt_file', fileInput.files[0]);
+            formData.append('scenario', document.getElementById('scenario').value);
+            selectedModels.forEach(modelId => {
+                formData.append('models[]', modelId);
+            });
+
+            const generateBtn = document.getElementById('generateBtn');
+            const spinner = document.getElementById('spinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Show loading state
+            generateBtn.disabled = true;
+            spinner.style.display = 'inline';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Download zip file
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'journeys.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    successMessage.textContent = 'Journeys generated successfully! Download started.';
+                    successMessage.style.display = 'block';
+                } else {
+                    const error = await response.json();
+                    errorMessage.textContent = error.error || 'An error occurred';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.display = 'block';
+            } finally {
+                generateBtn.disabled = false;
+                spinner.style.display = 'none';
+                updateGenerateButton();
+            }
+        });
+    </script>
+</body>
+</html>
+
