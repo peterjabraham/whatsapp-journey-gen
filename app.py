@@ -9,6 +9,13 @@ from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_file
 from journey_generator import generate_journeys
 
+# Monkey patch for gevent compatibility (if using gevent workers)
+try:
+    from gevent import monkey
+    monkey.patch_all()
+except ImportError:
+    pass  # gevent not installed, skip monkey patching
+
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
 
