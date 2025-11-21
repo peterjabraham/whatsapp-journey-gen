@@ -15,19 +15,19 @@
     "provider": "OpenAI"
   },
   {
-    "id": "openai/gpt-4.1-mini",
-    "name": "GPT-4.1 Mini",
-    "provider": "OpenAI"
+    "id": "moonshotai/kimi-k2-thinking",
+    "name": "Kimik2 Thinking",
+    "provider": "MoonshotAI"
   },
   {
-    "id": "anthropic/claude-3.5-sonnet",
-    "name": "Claude 3.5 Sonnet",
+    "id": "anthropic/claude-sonnet-4.5",
+    "name": "Claude Sonnet 4.5",
     "provider": "Anthropic"
   },
   {
-    "id": "meta-llama/llama-3.1-70b-instruct",
-    "name": "Llama 3.1 70B Instruct",
-    "provider": "Meta"
+    "id": "anthropic/claude-haiku-4.5",
+    "name": "Claude Haiku 4.5",
+    "provider": "Anthropic"
   }
 ]
 
