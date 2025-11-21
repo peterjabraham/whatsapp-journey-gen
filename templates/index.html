@@ -57,10 +57,28 @@
 
         // Load models on page load
         fetch('/api/models')
-            .then(response => response.json())
-            .then(models => {
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Response is not JSON");
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Handle both array and error object responses
+                const models = Array.isArray(data) ? data : (data.models || []);
+                if (data.error) {
+                    throw new Error(data.error);
+                }
                 const modelsList = document.getElementById('modelsList');
                 modelsList.innerHTML = '';
+                if (models.length === 0) {
+                    modelsList.innerHTML = '<div class="error">No models available. Please check server configuration.</div>';
+                    return;
+                }
                 models.forEach(model => {
                     const checkbox = document.createElement('div');
                     checkbox.className = 'model-checkbox';
@@ -76,8 +94,9 @@
                 });
             })
             .catch(error => {
+                console.error('Error loading models:', error);
                 document.getElementById('modelsList').innerHTML = 
-                    '<div class="error">Failed to load models. Please refresh the page.</div>';
+                    `<div class="error">Failed to load models: ${error.message}. Please refresh the page or check server logs.</div>`;
             });
 
         function handleModelChange(modelId, checked) {
@@ -182,22 +201,46 @@
                 });
 
                 if (response.ok) {
-                    // Download zip file
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'journeys.zip';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
+                    // Check if response is a zip file
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/zip')) {
+                        // Download zip file
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'journeys.zip';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
 
-                    successMessage.textContent = 'Journeys generated successfully! Download started.';
-                    successMessage.style.display = 'block';
+                        successMessage.textContent = 'Journeys generated successfully! Download started.';
+                        successMessage.style.display = 'block';
+                    } else {
+                        // Try to parse as JSON error
+                        try {
+                            const error = await response.json();
+                            errorMessage.textContent = error.error || 'An error occurred';
+                        } catch (e) {
+                            errorMessage.textContent = 'Unexpected response format from server';
+                        }
+                        errorMessage.style.display = 'block';
+                    }
                 } else {
-                    const error = await response.json();
-                    errorMessage.textContent = error.error || 'An error occurred';
+                    // Try to parse error as JSON
+                    try {
+                        const contentType = response.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                            const error = await response.json();
+                            errorMessage.textContent = error.error || 'An error occurred';
+                        } else {
+                            const text = await response.text();
+                            errorMessage.textContent = `Server error (${response.status}): ${text.substring(0, 200)}`;
+                        }
+                    } catch (e) {
+                        errorMessage.textContent = `Server error (${response.status}). Please check server logs.`;
+                    }
                     errorMessage.style.display = 'block';
                 }
             } catch (error) {

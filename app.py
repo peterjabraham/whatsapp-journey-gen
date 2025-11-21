@@ -14,8 +14,15 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
 
 # Load available models
 MODELS_FILE = Path(__file__).parent / "models.json"
-with open(MODELS_FILE, 'r') as f:
-    AVAILABLE_MODELS = json.load(f)
+try:
+    with open(MODELS_FILE, 'r') as f:
+        AVAILABLE_MODELS = json.load(f)
+except FileNotFoundError:
+    print(f"Warning: {MODELS_FILE} not found. Using empty models list.")
+    AVAILABLE_MODELS = []
+except json.JSONDecodeError as e:
+    print(f"Error: Invalid JSON in {MODELS_FILE}: {e}")
+    AVAILABLE_MODELS = []
 
 
 @app.route('/')
@@ -27,7 +34,10 @@ def index():
 @app.route('/api/models', methods=['GET'])
 def get_models():
     """Return list of available models."""
-    return jsonify(AVAILABLE_MODELS)
+    try:
+        return jsonify(AVAILABLE_MODELS)
+    except Exception as e:
+        return jsonify({"error": f"Failed to load models: {str(e)}"}), 500
 
 
 @app.route('/api/generate', methods=['POST'])
