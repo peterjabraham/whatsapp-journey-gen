@@ -30,6 +30,21 @@ header h1 {
     font-weight: 600;
 }
 
+.nav-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.3);
+}
+
 .subtitle {
     font-size: 1.1em;
     opacity: 0.9;

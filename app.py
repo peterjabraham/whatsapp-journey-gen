@@ -8,6 +8,7 @@ import io
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_file
 from journey_generator import generate_journeys
+from prompt_builder import generate_prompt_markdown
 
 # Monkey patch for gevent compatibility (if using gevent workers)
 try:
@@ -36,6 +37,47 @@ except json.JSONDecodeError as e:
 def index():
     """Serve the main frontend page."""
     return render_template('index.html')
+
+
+@app.route('/prompt-builder')
+def prompt_builder():
+    """Serve the prompt builder form page."""
+    return render_template('prompt_builder.html')
+
+
+@app.route('/api/generate-prompt', methods=['POST'])
+def generate_prompt():
+    """Generate prompt.md file from form data."""
+    try:
+        form_data = request.form.to_dict()
+        
+        # Handle multi-value fields (lists)
+        if 'unique_selling_points' in request.form:
+            form_data['unique_selling_points'] = request.form.getlist('unique_selling_points[]')
+        if 'url_product_pages' in request.form:
+            form_data['url_product_pages'] = request.form.getlist('url_product_pages[]')
+        if 'url_offer_pages' in request.form:
+            form_data['url_offer_pages'] = request.form.getlist('url_offer_pages[]')
+        if 'url_testimonials' in request.form:
+            form_data['url_testimonials'] = request.form.getlist('url_testimonials[]')
+        if 'products' in request.form:
+            form_data['products'] = request.form.getlist('products[]')
+        if 'brand_attributes' in request.form:
+            form_data['brand_attributes'] = request.form.getlist('brand_attributes[]')
+        
+        # Generate prompt markdown
+        prompt_content = generate_prompt_markdown(form_data)
+        
+        # Return as downloadable file
+        return send_file(
+            io.BytesIO(prompt_content.encode('utf-8')),
+            mimetype='text/markdown',
+            as_attachment=True,
+            download_name='PROMPT_4_WhatsApp_Journey_Generator.md'
+        )
+        
+    except Exception as e:
+        return jsonify({"error": f"Failed to generate prompt: {str(e)}"}), 500
 
 
 @app.route('/api/models', methods=['GET'])

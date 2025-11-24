@@ -8,7 +8,8 @@ from unittest.mock import patch, MagicMock, mock_open
 from io import BytesIO
 import zipfile
 from flask import Flask
-from app import app, AVAILABLE_MODELS
+from app import app
+from app import AVAILABLE_MODELS
 from journey_generator import (
     extract_prompt_body,
     slugify_model,
@@ -134,6 +135,44 @@ class TestFlaskApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'WhatsApp Journey Generator', response.data)
 
+    def test_prompt_builder_route(self):
+        """Test prompt builder page loads."""
+        response = self.app.get('/prompt-builder')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Prompt Builder', response.data)
+
+    def test_generate_prompt_route(self):
+        """Test prompt generation endpoint."""
+        data = {
+            'platform': 'WATI',
+            'format': 'B2C',
+            'duration_overall': '3 days',
+            'brand_name': 'Test Brand',
+            'industry': 'Test Industry',
+            'audience': 'Test Audience',
+            'offer_text': 'Test Offer',
+            'quote_code': 'TEST123',
+            'num_journeys': '1',
+            'deliverables': 'Journeys: 1. Deliverables: 1',
+            'day0_duration': '0-3 hours',
+            'day0_step1_timing': 'Immediate',
+            'day0_step2_timing': '+30 minutes',
+            'day0_step3_timing': '+2 hours',
+            'day1_start': '+24 hours',
+            'day2_start': '+24 hours',
+            'day3_start': '+24 hours',
+            'final_push_timing': '+3 hours',
+            'urgency_level': 'medium',
+            'sophistication_level': '7',
+            'tone': 'professional',
+            'emoji_usage': 'minimal'
+        }
+        response = self.app.post('/api/generate-prompt', data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, 'text/markdown')
+        self.assertIn(b'PROMPT: WhatsApp Journey Generator', response.data)
+        self.assertIn(b'Test Brand', response.data)
+
     def test_get_models_route(self):
         """Test models API endpoint."""
         response = self.app.get('/api/models')
@@ -160,11 +199,17 @@ class TestFlaskApp(unittest.TestCase):
             }
         }
 
-        # Create test file
+        # Create test file - need to reset BytesIO position
+        file_content = BytesIO(b'# Test prompt\n```\nPrompt content\n```')
+        file_content.seek(0)
+        
+        # Use a model ID that exists in models.json
+        valid_model = AVAILABLE_MODELS[0]['id'] if AVAILABLE_MODELS else 'openai/gpt-4.1-mini'
+        
         data = {
-            'prompt_file': (BytesIO(b'# Test prompt\n```\nPrompt content\n```'), 'test.md'),
+            'prompt_file': (file_content, 'test.md'),
             'scenario': 'Test Scenario',
-            'models[]': ['openai/gpt-4.1-mini']
+            'models[]': [valid_model]
         }
 
         response = self.app.post('/api/generate', data=data, content_type='multipart/form-data')
@@ -251,10 +296,14 @@ class TestFlaskApp(unittest.TestCase):
     @patch.dict(os.environ, {}, clear=True)
     def test_generate_route_no_api_key(self):
         """Test generation without API key configured."""
+        file_content = BytesIO(b'Test content')
+        file_content.seek(0)
+        # Use a valid model ID
+        valid_model = AVAILABLE_MODELS[0]['id'] if AVAILABLE_MODELS else 'x-ai/grok-4.1-fast'
         data = {
-            'prompt_file': (BytesIO(b'Test content'), 'test.md'),
+            'prompt_file': (file_content, 'test.md'),
             'scenario': 'Test Scenario',
-            'models[]': ['openai/gpt-4.1-mini']
+            'models[]': [valid_model]
         }
         response = self.app.post('/api/generate', data=data, content_type='multipart/form-data')
         self.assertEqual(response.status_code, 500)
@@ -267,10 +316,14 @@ class TestFlaskApp(unittest.TestCase):
         """Test handling of API errors."""
         mock_generate.side_effect = RuntimeError("API error occurred")
 
+        file_content = BytesIO(b'Test content')
+        file_content.seek(0)
+        # Use a valid model ID
+        valid_model = AVAILABLE_MODELS[0]['id'] if AVAILABLE_MODELS else 'x-ai/grok-4.1-fast'
         data = {
-            'prompt_file': (BytesIO(b'Test content'), 'test.md'),
+            'prompt_file': (file_content, 'test.md'),
             'scenario': 'Test Scenario',
-            'models[]': ['openai/gpt-4.1-mini']
+            'models[]': [valid_model]
         }
         response = self.app.post('/api/generate', data=data, content_type='multipart/form-data')
         self.assertEqual(response.status_code, 500)
