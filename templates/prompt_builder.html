@@ -5,122 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompt Builder - WhatsApp Journey Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .nav-link {
-            display: inline-block;
-            margin: 20px 0;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .nav-link:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        .form-section {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .form-section h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        .form-section h3 {
-            color: #764ba2;
-            margin-top: 25px;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 80px;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .help-text {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
-            font-style: italic;
-        }
-        .dynamic-list {
-            margin-top: 10px;
-        }
-        .list-item {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-        .list-item input {
-            flex: 1;
-        }
-        .btn-add {
-            padding: 8px 15px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        .btn-remove {
-            padding: 8px 15px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        .btn-add:hover {
-            background: #059669;
-        }
-        .btn-remove:hover {
-            background: #dc2626;
-        }
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-        }
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #667eea;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -131,6 +15,16 @@
         </header>
 
         <main>
+            <div class="info-banner">
+                <strong>📝 Step 1: Build Your Prompt</strong>
+                <p>
+                    Fill out all the fields below to create your custom prompt.md file. 
+                    This file will contain all the details about your brand, timeline, and journey requirements. 
+                    Once generated, you can download the prompt.md file and use it in the 
+                    <a href="/">Journey Generator</a> to create your WhatsApp journeys.
+                </p>
+            </div>
+
             <form id="promptBuilderForm">
                 <!-- 0.1 CONTEXT -->
                 <div class="form-section">
