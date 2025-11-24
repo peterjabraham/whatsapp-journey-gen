@@ -33,6 +33,12 @@ except json.JSONDecodeError as e:
     AVAILABLE_MODELS = []
 
 
+@app.route('/health')
+def health():
+    """Health check endpoint for Railway."""
+    return jsonify({"status": "ok", "service": "whatsapp-journey-generator"}), 200
+
+
 @app.route('/')
 def index():
     """Serve the main frontend page."""
