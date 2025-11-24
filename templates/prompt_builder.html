@@ -15,6 +15,7 @@
             <a href="/" class="nav-link">← Back to Journey Generator</a>
             <h1>Prompt Builder</h1>
             <p class="subtitle">Fill in the details to generate your prompt.md file</p>
+            <p class="subtitle" style="margin-top: 10px; font-size: 0.95em;">Once you have your prompt .md file, move on to the Journey Generator.</p>
         </header>
 
         <main>
@@ -305,6 +306,12 @@
                 <div id="errorMessage" class="error-message" style="display: none;"></div>
                 <div id="successMessage" class="success-message" style="display: none;"></div>
             </form>
+
+            <div id="nextStepButton" style="display: none; margin-top: 30px; text-align: center;">
+                <a href="/" class="btn-primary" style="display: inline-block; text-decoration: none; max-width: 400px;">
+                    <span class="btn-text">On to Journey Generator →</span>
+                </a>
+            </div>
         </main>
     </div>
 
@@ -366,9 +373,11 @@
             
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
+            const nextStepButton = document.getElementById('nextStepButton');
             
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
+            nextStepButton.style.display = 'none';
             
             try {
                 const response = await fetch('/api/generate-prompt', {
@@ -390,6 +399,9 @@
                     
                     successMessage.textContent = 'Prompt file generated successfully! Download started.';
                     successMessage.style.display = 'block';
+                    
+                    // Show the "On to Journey Generator" button
+                    document.getElementById('nextStepButton').style.display = 'block';
                 } else {
                     const error = await response.json();
                     errorMessage.textContent = error.error || 'An error occurred';
