@@ -58,20 +58,20 @@ More markdown after"""
 Here is the journey
 ```
 
-```file:full_detailed.html
+```file:summary_workflow.html
 <!DOCTYPE html>
 <html>Content</html>
 ```
 
-```file:workflow_overview.html
+```file:full_detail_workflow.html
 <!DOCTYPE html>
 <html>Overview</html>
 ```"""
         result = parse_files_from_content(content)
         self.assertEqual(len(result), 3)
         self.assertEqual(result[0][0], "journey.md")
-        self.assertEqual(result[1][0], "full_detailed.html")
-        self.assertEqual(result[2][0], "workflow_overview.html")
+        self.assertEqual(result[1][0], "summary_workflow.html")
+        self.assertEqual(result[2][0], "full_detail_workflow.html")
         self.assertIn("Journey content", result[0][1])
         self.assertIn("Content", result[1][1])
 
@@ -91,11 +91,11 @@ Here is the journey
 Content here
 ```
 
-```file:full_detailed.html
+```file:summary_workflow.html
 <html>Detailed</html>
 ```
 
-```file:workflow_overview.html
+```file:full_detail_workflow.html
 <html>Overview</html>
 ```"""
         mock_call_model.return_value = mock_response
@@ -110,8 +110,8 @@ Content here
         self.assertIn("test_scenario", result)
         self.assertIn("openai_gpt_4_1_mini", result["test_scenario"])
         self.assertIn("journey.md", result["test_scenario"]["openai_gpt_4_1_mini"])
-        self.assertIn("full_detailed.html", result["test_scenario"]["openai_gpt_4_1_mini"])
-        self.assertIn("workflow_overview.html", result["test_scenario"]["openai_gpt_4_1_mini"])
+        self.assertIn("summary_workflow.html", result["test_scenario"]["openai_gpt_4_1_mini"])
+        self.assertIn("full_detail_workflow.html", result["test_scenario"]["openai_gpt_4_1_mini"])
 
         # Verify API was called correctly
         mock_call_model.assert_called_once()
@@ -193,8 +193,8 @@ class TestFlaskApp(unittest.TestCase):
             "test_scenario": {
                 "test_model": {
                     "journey.md": "# Journey content",
-                    "full_detailed.html": "<html>Detailed</html>",
-                    "workflow_overview.html": "<html>Overview</html>"
+                    "summary_workflow.html": "<html>Summary</html>",
+                    "full_detail_workflow.html": "<html>Full Detail</html>"
                 }
             }
         }
@@ -222,7 +222,8 @@ class TestFlaskApp(unittest.TestCase):
         with zipfile.ZipFile(zip_data, 'r') as zip_file:
             files = zip_file.namelist()
             self.assertIn('outputs/test_scenario/test_model/journey.md', files)
-            self.assertIn('outputs/test_scenario/test_model/full_detailed.html', files)
+            self.assertIn('outputs/test_scenario/test_model/summary_workflow.html', files)
+            self.assertIn('outputs/test_scenario/test_model/full_detail_workflow.html', files)
 
     def test_generate_route_no_file(self):
         """Test generation without file."""

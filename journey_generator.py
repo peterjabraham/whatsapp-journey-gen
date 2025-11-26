@@ -16,16 +16,16 @@ FORMAT_INSTRUCTIONS = """Now format your entire response as exactly three fenced
 ...your markdown journey for the scenario...
 ```
 
-2) Full detailed HTML visualization:
+2) Summary Workflow HTML:
 
-```file:full_detailed.html
-...your full detailed HTML visualization for the scenario...
+```file:summary_workflow.html
+...your summary workflow HTML visualization for the scenario...
 ```
 
-3) Workflow overview HTML:
+3) Full Detail Workflow HTML:
 
-```file:workflow_overview.html
-...your workflow overview HTML visualization for the scenario...
+```file:full_detail_workflow.html
+...your full detail workflow HTML visualization for the scenario...
 ```
 """
 
@@ -134,8 +134,8 @@ def generate_journeys(
             "scenario_slug": {
                 "model_slug": {
                     "journey.md": "...",
-                    "full_detailed.html": "...",
-                    "workflow_overview.html": "..."
+                    "summary_workflow.html": "...",
+                    "full_detail_workflow.html": "..."
                 }
             }
         }

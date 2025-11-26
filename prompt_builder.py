@@ -228,15 +228,10 @@ Which deliverables do you want? (list all that apply)
 1. Journey Markdown Documents (.md files)
    - Detailed journey specs for WATI implementation.
 2. HTML Visualizations
-   - A) Full detailed visualization
-   - B) Workflow overview (structure only)
-   - C) Comparison summary
-3. Implementation Extras
-   - Implementation checklist
-   - Tag naming suggestions
-   - Asset list (images / creatives)
+   - A) Summary Workflow HTML (structure overview with key metrics)
+   - B) Full Detail Workflow HTML (complete step-by-step journey with all copy)
 
-Your answer (e.g. "Journeys: 3. Deliverables: 1, 2A, 2B, 2C, 3"): {deliverables}
+Your answer (e.g. "Journeys: 3. Deliverables: 1, 2A, 2B"): {deliverables}
 
 ---
 
@@ -590,97 +585,150 @@ Respect all WATI limits and brand voice.
 
 ---
 
-## 3. DELIVERABLE 2A: FULL DETAILED HTML VISUALIZATION
+## 3. DELIVERABLE 2A: SUMMARY WORKFLOW HTML
 
-Create a single HTML `<html>...</html>` document that:
+Create a single HTML `<html>...</html>` document that provides a high-level overview of the journey.
 
-* Has a **tabbed interface** (one tab per journey).
-* Shows:
-  * Full message copy (bodies, headers, footers).
-  * Button labels and destinations.
-  * Timing/delays.
-  * Auto-replies under each interactive step.
-  * Character counts (computed and displayed).
-  * Tags and asset requirements.
-  * Day-by-day breakdown.
-  * Colour-coded message roles:
-    * Standard (primary colour).
-    * Decision (accent).
-    * Conversion (conversion colour).
+**CRITICAL DESIGN REQUIREMENTS:**
+* Use a **maximum of 3 colors** with 20% tint variations for visual separation
+* **NO emojis or icons** anywhere in the HTML
+* **NO implementation notes section**
+* Clean, professional design with clear visual hierarchy
 
-Use `CONFIG.GLOBAL.brand_colours` to theme the page.
+**REQUIRED SECTIONS:**
 
----
+1. **Campaign Strategy**
+   * Journey title and description
+   * Key metrics cards showing:
+     * Total Days
+     * Total Messages
+     * Interactive Messages
+     * Total Duration (hours)
 
-## 4. DELIVERABLE 2B: WORKFLOW OVERVIEW HTML (STRUCTURE ONLY)
+2. **Journey Timeline**
+   * Day-by-day breakdown with:
+     * Day headers (e.g., "DAY 0: Immediate Engagement")
+     * Step cards showing:
+       * Step title
+       * Step type (Broadcast/Template or Conversational)
+       * Timing (e.g., "IMMEDIATE", "+30 seconds", "+24 hours")
+       * Brief description of step purpose
+     * Visual flow indicators (arrows, connectors)
+     * Wait times between steps clearly marked
 
-This is the **simplified visual structure** that corresponds to the first HTML file you saw.
+3. **Core Principles**
+   * List of 4-6 core principles that guide the journey
+   * Each principle in a card format with brief description
 
-Requirements:
+4. **Assets Required for Journey**
+   * Organized by day (Day 0, Day 1, etc.)
+   * For each asset:
+     * Asset name/description
+     * Which step it's used in
+     * Asset specifications (format, size, dimensions if applicable)
 
-* Same tabbed layout as 2A (one tab per journey).
-* For each journey:
-  * Journey title and meta summary.
-  * D0–D3 days as a vertical timeline.
-  * Within each day, a horizontal sequence of **step cards**:
-    * Show only:
-      * Step title (short label).
-      * Step type (Standard / Decision / Conversion).
-      * Timing.
-    * No long copy.
-  * Decision steps (role `decision`) highlighted (e.g. orange).
-  * Conversion steps (role `conversion`) highlighted (e.g. green).
-  * Optional branch box under the decision step listing the 3 personalisation paths.
-  * Summary stats at bottom:
-    * Total steps
-    * Decision points
-    * Days active
-    * Primary goal (short phrase)
-* Global legend:
-  * Standard message
-  * Decision / personalisation
-  * Conversion / key goal
+5. **URLs Used for Journey**
+   * List all URLs used throughout the journey
+   * For each URL:
+     * The URL itself
+     * Which steps use this URL
+     * Purpose (e.g., "Product page", "Demo booking", "Testimonials")
 
-Colour-coded using `GLOBAL.brand_colours`.
+6. **Discounts Used for Journey**
+   * List any discount codes or offers
+   * Discount details (amount, code, validity)
+   * Which steps mention the discount
 
----
-
-## 5. DELIVERABLE 2C: COMPARISON SUMMARY HTML
-
-Create a second HTML document (or a separate section) that:
-
-* Shows **side-by-side cards** – one per journey:
-  * Title, goal, days active, key segment (who it's for).
-* Includes a comparison table, for example:
-  * Rows: Features (Decision point, Branch count, Discount usage, Social proof type, Days, Total messages, etc.).
-  * Columns: Journey 1, Journey 2, Journey 3, Journey 4.
-* Adds an implementation checklist:
-  * List of:
-    * Tags to set up.
-    * Templates to approve.
-    * Broadcasts to configure.
-    * Assets to design.
-    * Tracking / UTM requirements.
-
-Use brand colours for accents.
+**STYLING:**
+* Use brand colors from `CONFIG.GLOBAL.brand_colours` (max 3 colors)
+* Apply 20% opacity variations (e.g., rgba with 0.2, 0.4, 0.6, 0.8) for visual separation
+* White content blocks on light background
+* Clear borders and spacing
+* Professional, clean layout
 
 ---
 
-## 6. DELIVERABLE 3: IMPLEMENTATION CHECKLIST, TAGS, ASSETS (IF REQUESTED)
+## 4. DELIVERABLE 2B: FULL DETAIL WORKFLOW HTML
 
-If the user requested implementation extras, summarise across all journeys:
+Create a single HTML `<html>...</html>` document that shows the complete detailed journey.
 
-* **Tag structure** (prefixes by journey and purpose).
-* **Node ID pattern** for WATI.
-* **Asset list**:
-  * Which images are needed.
-  * Where they are used.
-  * Recommended specs (orientation/use-case).
-* **Launch checklist**:
-  * Copy approval.
-  * Template approval.
-  * Test flows by segment.
-  * Opt-out checks.
+**CRITICAL DESIGN REQUIREMENTS:**
+* Use a **maximum of 3 colors** with 20% tint variations for visual separation
+* **NO emojis or icons** anywhere in the HTML
+* **NO implementation notes section**
+* Complete step-by-step breakdown with all message copy
+
+**REQUIRED SECTIONS:**
+
+1. **Journey Header**
+   * Journey title
+   * Subtitle: "Complete Detailed Visual Journey"
+   * Key metrics:
+     * Total Messages
+     * Interactive Messages
+     * Total Days
+     * Total Hours
+
+2. **Day-by-Day Detailed Breakdown**
+   For each day (Day 0, Day 1, Day 2, etc.):
+   
+   * **Day Header**
+     * Day name and purpose (e.g., "DAY 0: Immediate Engagement")
+     * Duration indicator
+   
+   * **Step Cards** (for each step):
+     * Step number and title
+     * Send timing (e.g., "SEND AT: 0 hours", "SEND AT: Day 1")
+     * Message type (Broadcast/Template or Conversational)
+     * **Full message copy** (header, body, footer if applicable)
+     * **Buttons/Quick Replies** with:
+       * Button text
+       * **Links/URLs** clearly displayed
+       * Destination URLs
+     * **Call-to-Actions** clearly marked with:
+       * CTA text
+       * **Full URL** displayed
+       * Purpose (e.g., "Book a Demo", "Learn More")
+     * **Media/Assets**:
+       * Asset name
+       * Caption if applicable
+       * Alt text
+     * **Auto-Reply Sections** (if interactive):
+       * Which button triggers this auto-reply
+       * Auto-reply message copy
+       * Links in auto-reply
+       * Wait time after auto-reply
+     * **Conditional Logic** (if applicable):
+       * Conditions clearly stated
+       * Branch paths shown
+     * **Wait Time** to next step
+
+3. **Complete Journey Summary**
+   * Summary metrics:
+     * Total Messages (per user)
+     * Interactive Messages (per user)
+     * Total Days (per user)
+     * Total Hours (per user)
+     * Total Steps (per user)
+   * Key Learnings (bullet points about journey structure)
+   * **DO NOT include "Ready for Implementation" section**
+
+**STYLING:**
+* Use brand colors from `CONFIG.GLOBAL.brand_colours` (max 3 colors)
+* Apply 20% opacity variations for visual separation
+* Color-coded step types:
+  * Standard messages (primary color)
+  * Decision points (accent color)
+  * Conversion steps (conversion color)
+* White content blocks on light background
+* Clear visual flow with connectors and arrows
+* Professional, clean layout
+
+**IMPORTANT:**
+* Ensure all **buttons have their links/URLs clearly displayed**
+* Ensure all **call-to-actions show the full URL** they link to
+* Ensure all **assets are listed** with their usage context
+* Ensure **conditional logic and branches** are clearly visualized
 
 ---
 
@@ -691,10 +739,8 @@ When you respond:
 1. Output the **`CONFIG` YAML** first.
 2. Then:
    * Journey Markdown specs.
-   * Full detailed HTML.
-   * Workflow Overview HTML.
-   * Comparison Summary HTML.
-   * Implementation checklist / extras (if requested).
+   * Summary Workflow HTML.
+   * Full Detail Workflow HTML.
 
 Keep each HTML deliverable clearly separated with headings:
 
@@ -707,21 +753,13 @@ Keep each HTML deliverable clearly separated with headings:
 
 ...markdown...
 
-=== HTML A – FULL DETAILED VISUALIZATION ===
+=== HTML A – SUMMARY WORKFLOW ===
 
 ...html...
 
-=== HTML B – WORKFLOW OVERVIEW (STRUCTURE ONLY) ===
+=== HTML B – FULL DETAIL WORKFLOW ===
 
 ...html...
-
-=== HTML C – COMPARISON SUMMARY ===
-
-...html...
-
-=== IMPLEMENTATION CHECKLIST & TAGS ===
-
-...markdown...
 ```
 
 Ensure:
@@ -762,7 +800,7 @@ Ensure:
         audience=get_value('audience', ''),
         compliance=get_value('compliance', ''),
         num_journeys=get_value('num_journeys', '1'),
-        deliverables=get_value('deliverables', 'Journeys: 1. Deliverables: 1, 2A, 2B, 2C'),
+        deliverables=get_value('deliverables', 'Journeys: 1. Deliverables: 1, 2A, 2B'),
         day0_duration=get_value('day0_duration', '0-3 hours'),
         day0_step1_timing=get_value('day0_step1_timing', 'Immediate'),
         day0_step2_timing=get_value('day0_step2_timing', '+30 minutes'),

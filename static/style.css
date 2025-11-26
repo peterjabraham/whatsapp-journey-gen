@@ -2,18 +2,18 @@
 /* Based on design3.md glassmorphism design system */
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(210 25% 7.8431%);
-  --primary: hsl(203.8863 88.2845% 53.1373%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(210 25% 7.8431%);
-  --accent: hsl(211.5789 51.3514% 92.7451%);
-  --destructive: hsl(356.3033 90.5579% 54.3137%);
-  --border: hsl(201.4286 30.4348% 90.9804%);
-  --input: hsl(200 23.0769% 97.4510%);
-  --ring: hsl(202.8169 89.1213% 53.1373%);
-  --radius: 1.3rem;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(210 25% 7.8431%);
+    --primary: hsl(203.8863 88.2845% 53.1373%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(210 25% 7.8431%);
+    --accent: hsl(211.5789 51.3514% 92.7451%);
+    --destructive: hsl(356.3033 90.5579% 54.3137%);
+    --border: hsl(201.4286 30.4348% 90.9804%);
+    --input: hsl(200 23.0769% 97.4510%);
+    --ring: hsl(202.8169 89.1213% 53.1373%);
+    --radius: 1.3rem;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
 * {
@@ -337,8 +337,13 @@ select:focus {
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Messages */
