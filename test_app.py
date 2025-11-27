@@ -22,16 +22,41 @@ from journey_generator import (
 class TestJourneyGenerator(unittest.TestCase):
     """Tests for core journey generator functions."""
 
-    def test_extract_prompt_body_with_fenced_block(self):
-        """Test extracting prompt from fenced code block."""
-        content = """# Some markdown
-```python
-This is the actual prompt content
-With multiple lines
+    def test_extract_prompt_body_with_embedded_code_blocks(self):
+        """Test that prompts with embedded code blocks return full content."""
+        # This is the realistic case - prompt has HTML/CSS code blocks inside
+        content = """# PROMPT: Journey Generator
+
+## Instructions
+Here are the instructions.
+
+```css
+:root { --primary: #1e3a5f; }
 ```
-More markdown after"""
+
+## More content
+And more instructions here.
+
+```html
+<div>Template</div>
+```
+"""
         result = extract_prompt_body(content)
-        self.assertEqual(result, "python\nThis is the actual prompt content\nWith multiple lines")
+        # Should return the FULL content, not just the first code block
+        self.assertIn("# PROMPT: Journey Generator", result)
+        self.assertIn("## Instructions", result)
+        self.assertIn("## More content", result)
+        self.assertIn(":root { --primary: #1e3a5f; }", result)
+        self.assertIn("<div>Template</div>", result)
+
+    def test_extract_prompt_body_wrapped_in_code_block(self):
+        """Test extracting prompt when ENTIRE content is wrapped in code block."""
+        content = """```
+This is the actual prompt content
+All wrapped in a single code block
+```"""
+        result = extract_prompt_body(content)
+        self.assertEqual(result, "This is the actual prompt content\nAll wrapped in a single code block")
 
     def test_extract_prompt_body_without_fenced_block(self):
         """Test extracting prompt when no fenced block exists."""

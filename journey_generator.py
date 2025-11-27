@@ -48,10 +48,34 @@ Now format your entire response as exactly three fenced code blocks, with no ext
 
 
 def extract_prompt_body(prompt_content: str) -> str:
-    """Extract prompt body from markdown content. If fenced code block exists, extract it."""
-    match = re.search(r"```(.*?)```", prompt_content, re.DOTALL)
-    if match:
-        return match.group(1).strip()
+    """
+    Extract prompt body from markdown content.
+    
+    Previously this extracted content from a single code block, but now our prompts
+    contain multiple code blocks (HTML/CSS templates), so we return the full content.
+    
+    Only extract from a code block if the ENTIRE content is wrapped in one
+    (starts with ``` on line 1).
+    """
+    lines = prompt_content.strip().split('\n')
+    
+    # Only extract if the prompt starts with a code fence (entire content wrapped)
+    if lines and lines[0].strip().startswith('```'):
+        # Find the closing fence and extract content between them
+        content_lines = []
+        in_block = False
+        for line in lines:
+            if line.strip().startswith('```') and not in_block:
+                in_block = True
+                continue
+            elif line.strip() == '```' and in_block:
+                break
+            elif in_block:
+                content_lines.append(line)
+        if content_lines:
+            return '\n'.join(content_lines).strip()
+    
+    # Otherwise return the full content as-is (prompt contains embedded code blocks)
     return prompt_content.strip()
 
 
