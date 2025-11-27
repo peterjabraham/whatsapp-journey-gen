@@ -729,6 +729,65 @@ All journeys must:
         <div class="stat-card"><div class="stat-value">7</div><div class="stat-label">Conversational Messages</div></div>
       </div>
     </div>
+    
+    <!-- URL Links Used in Campaign - REQUIRED SECTION -->
+    <div class="card">
+      <div class="card-title">URL Links Used in Campaign</div>
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: {brand['primary_color']}10; text-align: left;">
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">URL</th>
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Purpose</th>
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Used In</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">[Full URL from user input]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Main product/service page</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 0 Step 1, Day 1 Step 4</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">[Application/Form URL from user input]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Application/conversion form</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 2 Step 6, Day 3 Step 9</td>
+          </tr>
+          <!-- Add all URLs provided by user -->
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Assets Required - REQUIRED SECTION -->
+    <div class="card">
+      <div class="card-title">Assets Required for Campaign</div>
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: {brand['primary_color']}10; text-align: left;">
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Asset Type</th>
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Description</th>
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Used In</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>Image</strong></td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[Asset from user's assets list]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 0 Step 1 - Welcome message</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>PDF</strong></td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[Asset from user's assets list]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 1 Step 4 - Product guide</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>Video</strong></td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[Asset from user's assets list]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 2 Step 7 - Testimonial</td>
+          </tr>
+          <!-- List ALL assets from user's Required Assets input -->
+        </tbody>
+      </table>
+    </div>
   </div>
   
   <div class="footer">
@@ -1038,6 +1097,15 @@ All journeys must:
       </div>
     </div>
     
+    <!-- DAY ASSETS BOX - Show assets needed for this day -->
+    <div style="background: {brand['accent_color']}10; border: 1px solid {brand['accent_color']}30; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+      <div style="font-weight: 600; color: {brand['primary_color']}; margin-bottom: 10px;">Assets Required for Day 0</div>
+      <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
+        <li>[Asset from user input - e.g., Welcome banner image]</li>
+        <li>[Asset from user input - e.g., Product hero image]</li>
+      </ul>
+    </div>
+    
     <!-- Step 1 Detail Card -->
     <div class="step-detail">
       <div class="step-detail-header">
@@ -1063,12 +1131,23 @@ All journeys must:
           <div class="char-count">Characters: 20/60</div>
         </div>
         
+        <!-- CALL TO ACTION BUTTONS - REQUIRED: Show button text AND full URL -->
         <div class="buttons-section">
-          <div class="message-label">Buttons</div>
+          <div class="message-label">Call to Action Buttons</div>
           <div class="button-item">
-            <div class="button-text">[Button Text]</div>
-            <div class="button-url">https://example.com/page</div>
+            <div class="button-text">[CTA Button Text - e.g., "Learn More"]</div>
+            <div class="button-url">[FULL URL from user input - e.g., {brief['main_product_url']}]</div>
           </div>
+          <div class="button-item">
+            <div class="button-text">[CTA Button Text - e.g., "Apply Now"]</div>
+            <div class="button-url">[FULL URL from user input - e.g., {brief['application_url']}]</div>
+          </div>
+        </div>
+        
+        <!-- ASSET USED IN THIS STEP -->
+        <div style="margin-top: 15px; padding: 12px; background: #f3f4f6; border-radius: 8px;">
+          <div class="message-label">Asset Used</div>
+          <div style="color: #4b5563;">[Asset type]: [Asset name from user input]</div>
         </div>
       </div>
     </div>
@@ -1080,7 +1159,17 @@ All journeys must:
       <div class="wait-line"></div>
     </div>
     
-    <!-- More steps... -->
+    <!-- More steps for Day 0... -->
+    
+    <!-- REPEAT FOR EACH DAY (D1, D2, D3, etc.):
+         1. Day Header Bar
+         2. Day Assets Box (listing all assets needed for that day)
+         3. Step Detail Cards with:
+            - Full message content
+            - CTA Buttons with FULL URLs displayed
+            - Asset used in each step
+         4. Wait Indicators between steps
+    -->
     
     <!-- Complete Journey Summary -->
     <div class="summary-card">
@@ -1121,16 +1210,26 @@ All journeys must:
 
 ---
 
-## CRITICAL: DO NOT INCLUDE
+## CRITICAL: DO NOT DO THE FOLLOWING
 
-1. **NO EMOJIS** - Not in titles, content, buttons, anywhere
-2. **NO ICONS** - No FontAwesome, no icon fonts, no SVG icons
-3. **NO PINK/PURPLE** - Stick to the blue/orange/white color scheme
-4. **NO GRADIENTS** on cards (only on the main header)
-5. **NO "Implementation Notes"** section
-6. **NO "WATI Technical Specifications"** section
-7. **NO "Ready for Implementation"** checklist
-8. **NO decorative elements** - Keep it clean and professional
+1. **DO NOT MAKE UP DATA** - Use ONLY the company name, product name, URLs, assets, and other details provided by the user. Never invent industries, company names, product names, or URLs.
+2. **NO EMOJIS** - Not in titles, content, buttons, anywhere
+3. **NO ICONS** - No FontAwesome, no icon fonts, no SVG icons
+4. **NO PINK/PURPLE** - Stick to the blue/orange/white color scheme
+5. **NO GRADIENTS** on cards (only on the main header)
+6. **NO "Implementation Notes"** section
+7. **NO "WATI Technical Specifications"** section
+8. **NO "Ready for Implementation"** checklist
+9. **NO decorative elements** - Keep it clean and professional
+10. **NO placeholder URLs** like "example.com" - Use the actual URLs provided in the user input
+
+## CRITICAL: YOU MUST INCLUDE
+
+1. **URL Links Used** - Summary Workflow must have a table at the bottom listing ALL URLs from user input, showing where each is used
+2. **Assets Required** - Summary Workflow must have a table listing ALL assets from user input (images, PDFs, videos, etc.) and where used
+3. **CTA Buttons with Full URLs** - Full Detail Workflow must show Call to Action buttons with the COMPLETE URL displayed below each button
+4. **Day Assets** - Full Detail Workflow must show which assets are needed for EACH day at the start of each day section
+5. **Step Assets** - Full Detail Workflow should indicate which asset is used in each step that requires media
 
 ---
 
