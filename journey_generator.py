@@ -8,24 +8,41 @@ import requests
 
 BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-FORMAT_INSTRUCTIONS = """Now format your entire response as exactly three fenced code blocks, with no extra commentary before, after, or between them.
+FORMAT_INSTRUCTIONS = """
+## FINAL REMINDER - CRITICAL
+
+**USE ONLY THE DATA FROM SECTION 1 (BRIEF) ABOVE.**
+
+Do NOT invent:
+- Company names (use ONLY the company name from the BRIEF)
+- Product names (use ONLY the product name from the BRIEF)
+- Industries (use ONLY what's implied by the user's product/audience)
+- URLs (use ONLY the URLs provided in the BRIEF)
+- Assets (use ONLY the assets listed in the BRIEF)
+
+You MAY be creative with:
+- Message copy/wording (following brand voice)
+- Journey flow structure
+- Timing between messages
+
+Now format your entire response as exactly three fenced code blocks, with no extra commentary before, after, or between them.
 
 1) Markdown journey file:
 
 ```file:journey.md
-...your markdown journey for the scenario...
+(Journey documentation using ONLY the company, product, audience, URLs, and assets from the BRIEF section above)
 ```
 
 2) Summary Workflow HTML:
 
 ```file:summary_workflow.html
-...your summary workflow HTML visualization for the scenario...
+(Summary HTML using ONLY the company, product, audience, URLs, and assets from the BRIEF section above)
 ```
 
 3) Full Detail Workflow HTML:
 
 ```file:full_detail_workflow.html
-...your full detail workflow HTML visualization for the scenario...
+(Full detail HTML using ONLY the company, product, audience, URLs, and assets from the BRIEF section above)
 ```
 """
 
@@ -61,8 +78,12 @@ def call_model(model: str, prompt_body: str, scenario: str, api_key: str) -> str
         {
             "role": "system",
             "content": (
-                "You are an expert WhatsApp marketing automation journey designer "
-                "and senior front-end engineer. You strictly follow formatting instructions."
+                "You are an expert WhatsApp marketing automation journey designer. "
+                "CRITICAL RULE: You must ONLY use the company name, product name, industry, "
+                "URLs, and assets that the user provides in Section 1 (BRIEF). "
+                "NEVER invent fictional companies, products, industries, or URLs. "
+                "You may be creative with message wording and journey flow, but all "
+                "factual data (names, URLs, assets) must come directly from the user's input."
             ),
         },
         {
@@ -74,8 +95,9 @@ def call_model(model: str, prompt_body: str, scenario: str, api_key: str) -> str
             "content": (
                 "For this run, create journeys for the following scenario:\n\n"
                 f"{scenario}\n\n"
-                "Override any [NUMBER] placeholders to generate exactly ONE journey set.\n"
-                "Name the journey clearly using the scenario, audience, and product details.\n\n"
+                "REMEMBER: Use ONLY the company name, product name, URLs, and assets "
+                "from Section 1 (BRIEF) above. Do not invent any new companies, products, "
+                "industries, or URLs.\n\n"
                 f"{FORMAT_INSTRUCTIONS}"
             ),
         },

@@ -208,26 +208,40 @@ def generate_prompt_markdown(form_data: Dict[str, Any]) -> str:
 
 You are an expert **WhatsApp journey + marketing automation architect** specialised in:
 - {platform['platform']} (WhatsApp marketing automation)
-- B2C consumer acquisition journeys
+- Prospect acquisition journeys
 - Multi-day promotional and educational flows
 
-## CRITICAL: USE ONLY THE DATA PROVIDED
+---
 
-**YOU MUST USE ONLY the information provided in Section 1 (BRIEF) below.**
+## ⚠️ CRITICAL: USE ONLY THE USER'S DATA - NO EXCEPTIONS ⚠️
 
-- Company Name: **{brief['company_name']}** - use this exact name
-- Product Name: **{brief['product_name']}** - use this exact name
-- Target Audience: **{brief['audience_description']}** - use this exact description
-- Campaign Offer: **{brief['campaign_offer']}** - use this exact offer
-- Main URL: **{brief['main_product_url']}** - use this exact URL in CTA buttons
-- Application URL: **{brief['application_url']}** - use this exact URL in CTA buttons
-- Assets Required: **{brief['assets_list']}** - use these exact assets
+**THE USER HAS PROVIDED SPECIFIC DATA. YOU MUST USE IT EXACTLY.**
 
-**DO NOT INVENT:**
-- Do not create fictional company names, product names, or industries
-- Do not invent URLs - use ONLY the URLs provided above
-- Do not make up assets - use ONLY the assets listed above
-- Do not add emojis or icons anywhere
+| Data Field | User's Value (USE THIS EXACTLY) |
+|------------|--------------------------------|
+| Company Name | **{brief['company_name']}** |
+| Product Name | **{brief['product_name']}** |
+| Target Audience | **{brief['audience_description']}** |
+| Campaign Offer | **{brief['campaign_offer']}** |
+| Main URL | **{brief['main_product_url']}** |
+| Application URL | **{brief['application_url']}** |
+| Assets | **{brief['assets_list']}** |
+
+### STRICTLY FORBIDDEN - DO NOT DO THESE:
+
+❌ **DO NOT invent a company name** - Use "{brief['company_name']}" only
+❌ **DO NOT invent a product name** - Use "{brief['product_name']}" only  
+❌ **DO NOT invent an industry** - The industry is implied by the user's product
+❌ **DO NOT invent URLs** - Use ONLY "{brief['main_product_url']}" and "{brief['application_url']}"
+❌ **DO NOT invent assets** - Use ONLY what's in "{brief['assets_list']}"
+❌ **DO NOT use emojis or icons anywhere**
+❌ **DO NOT create fictional scenarios, case studies, or examples**
+
+### YOU MAY BE CREATIVE WITH:
+
+✅ Message copy/wording (following brand voice)
+✅ Journey flow and timing
+✅ How you describe benefits of the user's actual product
 
 Your job:
 1. Take the structured input fields below.
@@ -1107,12 +1121,13 @@ All journeys must:
       </div>
     </div>
     
-    <!-- DAY ASSETS BOX - Show assets needed for this day -->
+    <!-- DAY ASSETS BOX - Show assets needed for this day FROM USER'S ASSETS LIST ONLY -->
     <div style="background: {brand['accent_color']}10; border: 1px solid {brand['accent_color']}30; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
       <div style="font-weight: 600; color: {brand['primary_color']}; margin-bottom: 10px;">Assets Required for Day 0</div>
       <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
-        <li>[Asset from user input - e.g., Welcome banner image]</li>
-        <li>[Asset from user input - e.g., Product hero image]</li>
+        <!-- LIST ONLY ASSETS FROM: {brief['assets_list']} - DO NOT INVENT NEW ASSETS -->
+        <li>[First asset from user's assets_list]</li>
+        <li>[Second asset from user's assets_list if applicable]</li>
       </ul>
     </div>
     
