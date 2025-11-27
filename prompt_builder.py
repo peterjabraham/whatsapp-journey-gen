@@ -593,58 +593,91 @@ Create a single HTML `<html>...</html>` document that provides a high-level over
 * Use a **maximum of 3 colors** with 20% tint variations for visual separation
 * **NO emojis or icons** anywhere in the HTML
 * **NO implementation notes section**
+* **NO WATI Technical Specifications section**
 * Clean, professional design with clear visual hierarchy
 
-**REQUIRED SECTIONS:**
+**REQUIRED SECTIONS (IN THIS EXACT ORDER):**
 
-1. **Campaign Strategy**
-   * Journey title and description
-   * Key metrics cards showing:
-     * Total Days
-     * Total Messages
-     * Interactive Messages
-     * Total Duration (hours)
+1. **Header Section with Key Metrics**
+   * Journey title (e.g., "[Brand Name] [Journey Name] - Summary Workflow")
+   * Subtitle (e.g., "[Campaign Description]")
+   * **Metrics Row** - Display as cards in a horizontal row:
+     * Duration (e.g., "4 Days")
+     * Total Steps (e.g., "11")
+     * Decision Points (e.g., "1")
+     * Days Active (e.g., "4")
+     * Personalization Paths (e.g., "3")
+     * Broadcast Messages (e.g., "4")
+     * Conversational Messages (e.g., "7")
 
-2. **Journey Timeline**
-   * Day-by-day breakdown with:
-     * Day headers (e.g., "DAY 0: Immediate Engagement")
-     * Step cards showing:
-       * Step title
-       * Step type (Broadcast/Template or Conversational)
-       * Timing (e.g., "IMMEDIATE", "+30 seconds", "+24 hours")
-       * Brief description of step purpose
-     * Visual flow indicators (arrows, connectors)
-     * Wait times between steps clearly marked
+2. **Campaign Strategy Card**
+   * **Card Title:** "Campaign Strategy" or "Journey Overview"
+   * **Content:** A description of the campaign strategy, including:
+     * Entry Point (where leads come from)
+     * Target Audience (who the journey is for)
+     * Primary Goal (what the journey aims to achieve)
+     * Offer Code (if applicable)
+   * Display as a white card with border, clear typography
 
-3. **Core Principles**
-   * List of 4-6 core principles that guide the journey
-   * Each principle in a card format with brief description
+3. **Journey Timeline Section**
+   * **Section Heading:** "Journey Timeline" (full width heading)
+   * For each day (Day 0, Day 1, Day 2, etc.):
+     * **Day Card** - Full width card with:
+       * Day header (e.g., "D0 - DAY ZERO: Immediate Welcome & Personalisation")
+       * Duration (e.g., "0-3 hours")
+       * Purpose (brief description)
+       * **Step Cards** within the day:
+         * Step number and title
+         * Step type (BROADCAST or CONVERSATIONAL)
+         * Timing (e.g., "Immediate", "+30 minutes", "+2 hours")
+         * Brief description
+         * Mark decision points clearly
+       * **Calls to Action Cards** - Show all CTAs for that day:
+         * CTA text
+         * Full URL
+         * Purpose
+     * Visual flow indicators between days
 
-4. **Assets Required for Journey**
+4. **Core Principles Cards**
+   * **Section Heading:** "Core Principles"
+   * Display 4-6 principle cards in a grid (2-3 columns)
+   * Each card shows:
+     * Principle title
+     * Brief description
+   * Use consistent card styling with borders
+
+5. **Assets Required Card**
+   * **Card Title:** "Assets Required for Journey"
    * Organized by day (Day 0, Day 1, etc.)
    * For each asset:
      * Asset name/description
      * Which step it's used in
      * Asset specifications (format, size, dimensions if applicable)
+   * Display as a white card with organized list
 
-5. **URLs Used for Journey**
+6. **Key Links Card**
+   * **Card Title:** "Key Links Used" or "URLs Used for Journey"
    * List all URLs used throughout the journey
    * For each URL:
-     * The URL itself
+     * The URL itself (clickable link)
      * Which steps use this URL
      * Purpose (e.g., "Product page", "Demo booking", "Testimonials")
+   * Display as a white card with organized list
 
-6. **Discounts Used for Journey**
+7. **Discounts Used Card** (if applicable)
+   * **Card Title:** "Discounts Used for Journey"
    * List any discount codes or offers
    * Discount details (amount, code, validity)
    * Which steps mention the discount
+   * Display as a white card
 
 **STYLING:**
 * Use brand colors from `CONFIG.GLOBAL.brand_colours` (max 3 colors)
 * Apply 20% opacity variations (e.g., rgba with 0.2, 0.4, 0.6, 0.8) for visual separation
-* White content blocks on light background
-* Clear borders and spacing
-* Professional, clean layout
+* White content cards/blocks on light background
+* Day cards should be full width with rounded corners
+* Clear borders and spacing between sections
+* Professional, clean layout with consistent card styling
 
 ---
 
@@ -656,79 +689,115 @@ Create a single HTML `<html>...</html>` document that shows the complete detaile
 * Use a **maximum of 3 colors** with 20% tint variations for visual separation
 * **NO emojis or icons** anywhere in the HTML
 * **NO implementation notes section**
+* **NO WATI Technical Specifications section**
 * Complete step-by-step breakdown with all message copy
 
-**REQUIRED SECTIONS:**
+**REQUIRED SECTIONS (IN THIS EXACT ORDER):**
 
 1. **Journey Header**
-   * Journey title
+   * Journey title (e.g., "[Brand Name] [Journey Name] - Full Detail Workflow")
    * Subtitle: "Complete Detailed Visual Journey"
-   * Key metrics:
+   * **Key Metrics Row** - Display as cards:
      * Total Messages
      * Interactive Messages
      * Total Days
      * Total Hours
+     * Total Steps
+     * Decision Points
 
 2. **Day-by-Day Detailed Breakdown**
    For each day (Day 0, Day 1, Day 2, etc.):
    
-   * **Day Header**
-     * Day name and purpose (e.g., "DAY 0: Immediate Engagement")
-     * Duration indicator
+   * **Day Header Rectangle** - **FULL COLUMN WIDTH** with rounded corners:
+     * Background color (use brand color with 20% opacity variation)
+     * Day name and purpose (e.g., "D0 - DAY ZERO: Immediate Welcome & Personalisation")
+     * Duration indicator (e.g., "0-3 hours")
+     * Purpose description
+     * This should be a prominent, full-width rectangular header
    
-   * **Step Cards** (for each step):
-     * Step number and title
-     * Send timing (e.g., "SEND AT: 0 hours", "SEND AT: Day 1")
-     * Message type (Broadcast/Template or Conversational)
-     * **Full message copy** (header, body, footer if applicable)
-     * **Buttons/Quick Replies** with:
-       * Button text
-       * **Links/URLs** clearly displayed
-       * Destination URLs
-     * **Call-to-Actions** clearly marked with:
+   * **Step Cards** (for each step within the day):
+     * Step number and title (e.g., "Step 1: Welcome & Instant Value")
+     * Send timing (e.g., "SEND AT: Immediate", "SEND AT: +30 minutes")
+     * Message type badge (BROADCAST/TEMPLATE or CONVERSATIONAL)
+     * **Full message copy** displayed in a clear, readable format:
+       * Header text (if used)
+       * Body text (full copy)
+       * Footer text (if used)
+       * Character counts displayed
+     * **Buttons/Quick Replies** section:
+       * Each button shown with:
+         * Button text
+         * **Full URL** clearly displayed next to button
+         * Destination/purpose
+     * **Call-to-Actions** section (clearly marked):
        * CTA text
-       * **Full URL** displayed
-       * Purpose (e.g., "Book a Demo", "Learn More")
-     * **Media/Assets**:
+       * **Full URL** displayed prominently
+       * Purpose description
+     * **Media/Assets** section:
        * Asset name
        * Caption if applicable
        * Alt text
-     * **Auto-Reply Sections** (if interactive):
-       * Which button triggers this auto-reply
-       * Auto-reply message copy
-       * Links in auto-reply
+       * Where it's used in the step
+     * **Auto-Reply Sections** (if interactive step):
+       * Which button/option triggers this auto-reply
+       * Auto-reply message copy (full text)
+       * Links in auto-reply (with full URLs)
        * Wait time after auto-reply
      * **Conditional Logic** (if applicable):
        * Conditions clearly stated
-       * Branch paths shown
-     * **Wait Time** to next step
+       * Branch paths shown visually
+     * **Wait Time** to next step (clearly marked)
+     * Step card should have clear borders and spacing
 
-3. **Complete Journey Summary**
-   * Summary metrics:
+3. **Complete Journey Summary Card**
+   * **Card Title:** "Complete Journey Summary"
+   * **Full width card** with rounded corners
+   * **Summary Metrics:**
      * Total Messages (per user)
      * Interactive Messages (per user)
      * Total Days (per user)
      * Total Hours (per user)
      * Total Steps (per user)
-   * Key Learnings (bullet points about journey structure)
-   * **DO NOT include "Ready for Implementation" section**
+     * Decision Points
+     * Personalization Paths
+   * **Required Assets List:**
+     * Organized list of all assets needed
+     * For each asset:
+       * Asset name/description
+       * Which step(s) use it
+       * Asset specifications
+   * **Key URLs Used:**
+     * List all URLs used in the journey
+     * For each URL:
+       * The URL (clickable)
+       * Which steps use it
+       * Purpose
+   * **DO NOT include:**
+     * "Ready for Implementation" section
+     * "WATI Technical Specifications" section
+     * Implementation checklist
 
 **STYLING:**
 * Use brand colors from `CONFIG.GLOBAL.brand_colours` (max 3 colors)
-* Apply 20% opacity variations for visual separation
+* Apply 20% opacity variations (0.2, 0.4, 0.6, 0.8) for visual separation
+* **Day headers must be FULL COLUMN WIDTH rectangles with rounded corners**
 * Color-coded step types:
-  * Standard messages (primary color)
-  * Decision points (accent color)
-  * Conversion steps (conversion color)
-* White content blocks on light background
-* Clear visual flow with connectors and arrows
-* Professional, clean layout
+  * Standard messages (primary color with tint)
+  * Decision points (accent color with tint)
+  * Conversion steps (conversion color with tint)
+* White content cards/blocks on light background
+* Clear visual flow with connectors and spacing
+* Professional, clean layout with consistent card styling
+* Step cards should have clear borders and padding
 
 **IMPORTANT:**
+* **Day headers (D0, D1, D2, etc.) MUST be full column width rectangles with rounded corners**
 * Ensure all **buttons have their links/URLs clearly displayed**
 * Ensure all **call-to-actions show the full URL** they link to
-* Ensure all **assets are listed** with their usage context
+* Ensure all **assets are listed** in the Complete Journey Summary
+* Ensure all **URLs are listed** in the Complete Journey Summary
 * Ensure **conditional logic and branches** are clearly visualized
+* Use consistent spacing and typography throughout
 
 ---
 
