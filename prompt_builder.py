@@ -48,6 +48,28 @@ def build_config_from_form(form_data: Dict[str, Any]) -> Dict[str, Any]:
     # Build tone list
     tone_of_voice = get_list('tone_of_voice[]') or get_list('tone_of_voice')
     
+    # Handle colors - use defaults if URL provided but no colors specified
+    primary_color = get_value('primary_color', '')
+    accent_color = get_value('accent_color', '')
+    background_color = get_value('background_color', '')
+    colors_url = get_value('colors_from_url', '')
+    
+    # If URL provided but no colors, use professional defaults
+    if colors_url and not primary_color:
+        primary_color = '#1e3a5f'  # Dark blue
+    if colors_url and not accent_color:
+        accent_color = '#e67e22'   # Orange
+    if colors_url and not background_color:
+        background_color = '#f5f7fa'  # Light gray
+    
+    # Fallback defaults if still empty
+    if not primary_color:
+        primary_color = '#1e3a5f'
+    if not accent_color:
+        accent_color = '#e67e22'
+    if not background_color:
+        background_color = '#f5f7fa'
+    
     # Build config
     config = {
         'BRIEF': {
@@ -94,9 +116,10 @@ def build_config_from_form(form_data: Dict[str, Any]) -> Dict[str, Any]:
             'brand_positioning': get_value('brand_positioning'),
             'use_emojis': get_bool('use_emojis', False),
             'emoji_style': get_value('emoji_style'),
-            'primary_color': get_value('primary_color', '#315891'),
-            'accent_color': get_value('accent_color', '#D44437'),
-            'background_color': get_value('background_color', '#E9E9E9'),
+            'primary_color': primary_color,
+            'accent_color': accent_color,
+            'background_color': background_color,
+            'colors_from_url': colors_url,
             'logo_reference': get_value('logo_reference'),
             'brand_phrases': get_list('brand_phrases[]') or get_list('brand_phrases'),
         },
@@ -310,6 +333,7 @@ All journeys must:
 | Primary Color | {brand['primary_color']} |
 | Accent Color | {brand['accent_color']} |
 | Background Color | {brand['background_color']} |
+| Colors Source URL | {brand['colors_from_url'] or '(Not specified)'} |
 | Logo Reference | {brand['logo_reference'] or '(Not specified)'} |
 
 ### Key Brand Phrases
@@ -400,87 +424,735 @@ All journeys must:
 
 ---
 
-## OUTPUT SPECIFICATIONS
+## OUTPUT SPECIFICATIONS - CRITICAL: FOLLOW EXACTLY
 
-### Summary Workflow HTML Requirements
+### COLOR SCHEME (Use these exact colors)
 
-**CRITICAL DESIGN REQUIREMENTS:**
-- Use a **maximum of 3 colors** (primary: {brand['primary_color']}, accent: {brand['accent_color']}, background: {brand['background_color']}) with 20% tint variations
-- **NO emojis or icons** anywhere in the HTML
-- **NO implementation notes section**
-- **NO WATI Technical Specifications section**
+```css
+:root {{
+  --primary: {brand['primary_color']};        /* Dark blue - header, day badges */
+  --primary-light: {brand['primary_color']}20; /* 20% opacity - backgrounds */
+  --accent: {brand['accent_color']};          /* Orange/yellow - highlights, badges */
+  --accent-light: {brand['accent_color']}20;  /* 20% opacity - step backgrounds */
+  --background: {brand['background_color']};  /* Light gray - page background */
+  --white: #ffffff;                           /* Cards */
+  --text-dark: #1a1a2e;                       /* Primary text */
+  --text-light: #6b7280;                      /* Secondary text */
+  --success: #10b981;                         /* Green for conversational */
+  --broadcast: #3b82f6;                       /* Blue for broadcast */
+}}
+```
 
-**REQUIRED SECTIONS (IN THIS EXACT ORDER):**
+---
 
-1. **Header with Key Metrics** - Journey title, subtitle, metrics row (Duration, Total Steps, Decision Points, etc.)
+### SUMMARY WORKFLOW HTML - EXACT STRUCTURE
 
-2. **Campaign Strategy Card** - Entry Point, Target Audience, Primary Goal, Offer Code
+**ABSOLUTE REQUIREMENTS:**
+- NO emojis anywhere (not in titles, not in content, nowhere)
+- NO icons or icon fonts
+- NO gradients (except header)
+- NO pink, purple, or bright colors
+- Professional business document style
+- White cards on light gray background
 
-3. **Journey Timeline Section** - For each day:
-   - Day header with duration and purpose
-   - Step cards with timing, type (BROADCAST/CONVERSATIONAL), description
-   - **Calls to Action cards** showing CTA text, full URL, and purpose
+**EXACT HTML STRUCTURE TO FOLLOW:**
 
-4. **Core Principles Cards** - 4-6 principle cards in a grid
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Journey Name] - Summary Workflow</title>
+  <style>
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: {brand['background_color']};
+      color: #1a1a2e;
+      line-height: 1.6;
+    }}
+    
+    /* HEADER - Dark blue gradient */
+    .header {{
+      background: linear-gradient(135deg, {brand['primary_color']} 0%, #0f2942 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }}
+    .header h1 {{ font-size: 28px; margin-bottom: 8px; }}
+    .header .subtitle {{ opacity: 0.9; margin-bottom: 20px; }}
+    
+    /* METRICS ROW - Horizontal cards in header */
+    .metrics-row {{
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }}
+    .metric {{
+      background: rgba(255,255,255,0.15);
+      padding: 15px 25px;
+      border-radius: 8px;
+      text-align: center;
+    }}
+    .metric-value {{ font-size: 24px; font-weight: 700; }}
+    .metric-label {{ font-size: 12px; text-transform: uppercase; opacity: 0.8; }}
+    
+    .container {{ max-width: 1000px; margin: 0 auto; padding: 30px 20px; }}
+    
+    /* WHITE CARDS */
+    .card {{
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }}
+    .card-title {{
+      font-size: 18px;
+      font-weight: 600;
+      color: {brand['primary_color']};
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid {brand['primary_color']}20;
+    }}
+    
+    /* JOURNEY OVERVIEW - 4 column grid */
+    .overview-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }}
+    .overview-item h4 {{
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }}
+    .overview-item p {{ font-size: 14px; color: #1a1a2e; }}
+    
+    /* DAY SECTION with orange badge */
+    .day-section {{ margin-bottom: 30px; }}
+    .day-header {{
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }}
+    .day-badge {{
+      width: 50px;
+      height: 50px;
+      background: {brand['accent_color']};
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }}
+    .day-badge .code {{ font-size: 14px; }}
+    .day-badge .label {{ font-size: 8px; text-transform: uppercase; }}
+    .day-title {{ font-size: 20px; font-weight: 600; color: #1a1a2e; }}
+    .day-meta {{ font-size: 13px; color: #6b7280; }}
+    
+    /* STEP CARDS - Grid layout */
+    .steps-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+    }}
+    .step-card {{
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 18px;
+    }}
+    .step-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }}
+    .step-number {{
+      width: 28px;
+      height: 28px;
+      background: {brand['primary_color']};
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }}
+    .step-badge {{
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }}
+    .step-badge.broadcast {{ background: #dbeafe; color: #1d4ed8; }}
+    .step-badge.conversational {{ background: #d1fae5; color: #047857; }}
+    .step-title {{ font-size: 15px; font-weight: 600; margin-bottom: 8px; }}
+    .step-timing {{ font-size: 12px; color: #6b7280; }}
+    .step-type {{ font-size: 12px; color: #9ca3af; margin-top: 8px; }}
+    
+    /* PERSONALIZATION BOX */
+    .personalization-box {{
+      background: {brand['primary_color']}08;
+      border: 2px dashed {brand['primary_color']}40;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 25px 0;
+    }}
+    .personalization-title {{
+      font-size: 16px;
+      font-weight: 600;
+      color: {brand['primary_color']};
+      margin-bottom: 10px;
+    }}
+    .paths-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 15px;
+    }}
+    .path-card {{
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }}
+    .path-card h4 {{ font-size: 14px; font-weight: 600; color: #1a1a2e; }}
+    
+    /* STATISTICS SECTION */
+    .stats-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }}
+    .stat-card {{
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }}
+    .stat-value {{ font-size: 28px; font-weight: 700; color: {brand['primary_color']}; }}
+    .stat-label {{ font-size: 11px; color: #6b7280; text-transform: uppercase; margin-top: 5px; }}
+    
+    /* FOOTER */
+    .footer {{
+      text-align: center;
+      padding: 30px;
+      color: #9ca3af;
+      font-size: 12px;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 40px;
+    }}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>[Product] [Journey Name]</h1>
+    <p class="subtitle">[Subtitle - e.g., "First-Time Saver Onboarding - Summary Workflow"]</p>
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-label">Duration</div><div class="metric-value">4 Days</div></div>
+      <div class="metric"><div class="metric-label">Total Steps</div><div class="metric-value">11</div></div>
+      <div class="metric"><div class="metric-label">Decision Points</div><div class="metric-value">1</div></div>
+      <div class="metric"><div class="metric-label">Paths</div><div class="metric-value">3</div></div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <!-- Journey Overview Card -->
+    <div class="card">
+      <div class="card-title">Journey Overview</div>
+      <div class="overview-grid">
+        <div class="overview-item"><h4>Entry Point</h4><p>[Entry point details]</p></div>
+        <div class="overview-item"><h4>Target Audience</h4><p>[Audience details]</p></div>
+        <div class="overview-item"><h4>Primary Goal</h4><p>[Goal details]</p></div>
+        <div class="overview-item"><h4>Offer Code</h4><p>[Offer code]</p></div>
+      </div>
+    </div>
+    
+    <!-- Day 0 Section -->
+    <div class="day-section">
+      <div class="day-header">
+        <div class="day-badge"><span class="code">D0</span><span class="label">Day Zero</span></div>
+        <div>
+          <div class="day-title">Immediate Welcome & Personalisation</div>
+          <div class="day-meta">Duration: 0-3 hours | Purpose: Establish trust, educate on benefits</div>
+        </div>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-number">1</div>
+            <span class="step-badge broadcast">Broadcast</span>
+          </div>
+          <div class="step-title">Welcome & Instant Value</div>
+          <div class="step-timing">Immediate</div>
+          <div class="step-type">Standard</div>
+        </div>
+        <!-- More step cards... -->
+      </div>
+    </div>
+    
+    <!-- Personalization Branching -->
+    <div class="personalization-box">
+      <div class="personalization-title">Personalisation Branching</div>
+      <p>Based on the user's selection, the journey splits into three tailored paths for Days 1-3</p>
+      <div class="paths-grid">
+        <div class="path-card"><h4>Path A: [Option 1]</h4></div>
+        <div class="path-card"><h4>Path B: [Option 2]</h4></div>
+        <div class="path-card"><h4>Path C: [Option 3]</h4></div>
+      </div>
+    </div>
+    
+    <!-- More day sections (D1, D2, D3)... -->
+    
+    <!-- Journey Statistics -->
+    <div class="card">
+      <div class="card-title">Journey Statistics</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value">11</div><div class="stat-label">Total Steps</div></div>
+        <div class="stat-card"><div class="stat-value">1</div><div class="stat-label">Decision Points</div></div>
+        <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Days Active</div></div>
+        <div class="stat-card"><div class="stat-value">3</div><div class="stat-label">Personalisation Paths</div></div>
+        <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Broadcast Messages</div></div>
+        <div class="stat-card"><div class="stat-value">7</div><div class="stat-label">Conversational Messages</div></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    [Company Name] [Journey Name] | {platform['platform']} WhatsApp Automation | Version 1.0
+  </div>
+</body>
+</html>
+```
 
-5. **Assets Required Card** - Organized by day, with asset specifications
+---
 
-6. **Key Links Card** - All URLs used, which steps use them, purpose
+### FULL DETAIL WORKFLOW HTML - EXACT STRUCTURE
 
-7. **Discounts Used Card** - Discount codes, amounts, validity, which steps mention them
+**ABSOLUTE REQUIREMENTS:**
+- Same color scheme as Summary Workflow
+- NO emojis anywhere
+- NO icons
+- Full message copy displayed in each step
+- URLs shown in full (not just as links)
+- Character counts shown
 
-### Full Detail Workflow HTML Requirements
+**EXACT HTML STRUCTURE TO FOLLOW:**
 
-**CRITICAL DESIGN REQUIREMENTS:**
-- Use a **maximum of 3 colors** with 20% tint variations
-- **NO emojis or icons** anywhere
-- **NO implementation notes section**
-- Day headers (D0, D1, etc.) **MUST be full column width rectangles with rounded corners**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Journey Name] - Full Detailed Workflow</title>
+  <style>
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+    body {{
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: {brand['background_color']};
+      color: #1a1a2e;
+      line-height: 1.6;
+    }}
+    
+    /* Same header as Summary */
+    .header {{
+      background: linear-gradient(135deg, {brand['primary_color']} 0%, #0f2942 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }}
+    .header h1 {{ font-size: 28px; margin-bottom: 8px; }}
+    .header .subtitle {{ opacity: 0.9; margin-bottom: 20px; }}
+    .metrics-row {{
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }}
+    .metric {{
+      background: rgba(255,255,255,0.15);
+      padding: 15px 25px;
+      border-radius: 8px;
+      text-align: center;
+    }}
+    .metric-value {{ font-size: 24px; font-weight: 700; }}
+    .metric-label {{ font-size: 12px; text-transform: uppercase; opacity: 0.8; }}
+    
+    .container {{ max-width: 900px; margin: 0 auto; padding: 30px 20px; }}
+    
+    /* DAY HEADER - FULL WIDTH RECTANGLE */
+    .day-header-bar {{
+      background: {brand['primary_color']};
+      color: white;
+      padding: 20px 25px;
+      border-radius: 12px;
+      margin: 30px 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }}
+    .day-badge-large {{
+      width: 60px;
+      height: 60px;
+      background: {brand['accent_color']};
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }}
+    .day-badge-large .code {{ font-size: 18px; }}
+    .day-badge-large .label {{ font-size: 9px; text-transform: uppercase; }}
+    .day-info h2 {{ font-size: 22px; margin-bottom: 5px; }}
+    .day-info p {{ opacity: 0.9; font-size: 14px; }}
+    
+    /* STEP CARD - Full detail */
+    .step-detail {{
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }}
+    .step-detail-header {{
+      background: {brand['primary_color']}10;
+      padding: 18px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+    }}
+    .step-detail-number {{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }}
+    .step-num {{
+      width: 32px;
+      height: 32px;
+      background: {brand['primary_color']};
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }}
+    .step-detail-title {{ font-size: 17px; font-weight: 600; }}
+    .step-timing-badge {{
+      font-size: 13px;
+      color: #6b7280;
+    }}
+    .step-type-badge {{
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }}
+    .step-type-badge.broadcast {{ background: #dbeafe; color: #1d4ed8; }}
+    .step-type-badge.conversational {{ background: #d1fae5; color: #047857; }}
+    
+    .step-detail-body {{ padding: 25px; }}
+    
+    /* MESSAGE CONTENT BOX */
+    .message-box {{
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }}
+    .message-label {{
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }}
+    .message-content {{
+      font-size: 15px;
+      color: #1a1a2e;
+      white-space: pre-wrap;
+    }}
+    .char-count {{
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 10px;
+      text-align: right;
+    }}
+    
+    /* BUTTONS SECTION */
+    .buttons-section {{
+      margin-top: 20px;
+    }}
+    .button-item {{
+      background: {brand['accent_color']}15;
+      border: 1px solid {brand['accent_color']}40;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+    }}
+    .button-text {{
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 5px;
+    }}
+    .button-url {{
+      font-size: 13px;
+      color: {brand['primary_color']};
+      word-break: break-all;
+    }}
+    
+    /* AUTO-REPLY BOX */
+    .auto-reply {{
+      background: #fef3c7;
+      border: 1px solid #f59e0b40;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }}
+    .auto-reply-title {{
+      font-size: 13px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 10px;
+    }}
+    
+    /* WAIT INDICATOR */
+    .wait-indicator {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #6b7280;
+      font-size: 14px;
+    }}
+    .wait-line {{
+      height: 40px;
+      width: 2px;
+      background: #d1d5db;
+      margin: 0 15px;
+    }}
+    
+    /* SUMMARY CARD */
+    .summary-card {{
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }}
+    .summary-title {{
+      font-size: 20px;
+      font-weight: 600;
+      color: {brand['primary_color']};
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid {brand['primary_color']}20;
+    }}
+    .summary-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }}
+    .summary-stat {{
+      text-align: center;
+      padding: 15px;
+      background: {brand['background_color']};
+      border-radius: 10px;
+    }}
+    .summary-stat-value {{ font-size: 28px; font-weight: 700; color: {brand['primary_color']}; }}
+    .summary-stat-label {{ font-size: 12px; color: #6b7280; margin-top: 5px; }}
+    
+    .assets-section, .urls-section {{
+      margin-top: 30px;
+    }}
+    .section-subtitle {{
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 15px;
+    }}
+    .asset-list, .url-list {{
+      list-style: none;
+    }}
+    .asset-list li, .url-list li {{
+      padding: 10px 0;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }}
+    .url-list li a {{
+      color: {brand['primary_color']};
+      word-break: break-all;
+    }}
+    
+    .footer {{
+      text-align: center;
+      padding: 30px;
+      color: #9ca3af;
+      font-size: 12px;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 40px;
+    }}
+  </style>
+</head>
+<body>
+  <!-- Same header structure -->
+  <div class="header">
+    <h1>[Product] [Journey Name]</h1>
+    <p class="subtitle">Full Detailed Workflow - Complete Message Content</p>
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-label">Total Messages</div><div class="metric-value">11</div></div>
+      <div class="metric"><div class="metric-label">Interactive</div><div class="metric-value">4</div></div>
+      <div class="metric"><div class="metric-label">Days</div><div class="metric-value">4</div></div>
+      <div class="metric"><div class="metric-label">Hours</div><div class="metric-value">96</div></div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <!-- Journey Overview Card (same as summary) -->
+    
+    <!-- DAY 0 - Full Width Header Bar -->
+    <div class="day-header-bar">
+      <div class="day-badge-large"><span class="code">D0</span><span class="label">Day Zero</span></div>
+      <div class="day-info">
+        <h2>Immediate Welcome & Personalisation</h2>
+        <p>Duration: 0-3 hours | Purpose: Establish trust, educate on benefits, segment by goal</p>
+      </div>
+    </div>
+    
+    <!-- Step 1 Detail Card -->
+    <div class="step-detail">
+      <div class="step-detail-header">
+        <div class="step-detail-number">
+          <div class="step-num">1</div>
+          <div>
+            <div class="step-detail-title">Welcome & Instant Value</div>
+            <div class="step-timing-badge">SEND AT: Immediate</div>
+          </div>
+        </div>
+        <span class="step-type-badge broadcast">Broadcast</span>
+      </div>
+      <div class="step-detail-body">
+        <div class="message-box">
+          <div class="message-label">Message Body</div>
+          <div class="message-content">[Full message text goes here - exactly as it should appear in WhatsApp]</div>
+          <div class="char-count">Characters: 156/200</div>
+        </div>
+        
+        <div class="message-box">
+          <div class="message-label">Footer</div>
+          <div class="message-content">Type STOP to opt-out</div>
+          <div class="char-count">Characters: 20/60</div>
+        </div>
+        
+        <div class="buttons-section">
+          <div class="message-label">Buttons</div>
+          <div class="button-item">
+            <div class="button-text">[Button Text]</div>
+            <div class="button-url">https://example.com/page</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Wait Indicator -->
+    <div class="wait-indicator">
+      <div class="wait-line"></div>
+      Wait: +30 minutes
+      <div class="wait-line"></div>
+    </div>
+    
+    <!-- More steps... -->
+    
+    <!-- Complete Journey Summary -->
+    <div class="summary-card">
+      <div class="summary-title">Complete Journey Summary</div>
+      <div class="summary-grid">
+        <div class="summary-stat"><div class="summary-stat-value">11</div><div class="summary-stat-label">Total Steps</div></div>
+        <div class="summary-stat"><div class="summary-stat-value">1</div><div class="summary-stat-label">Decision Points</div></div>
+        <div class="summary-stat"><div class="summary-stat-value">4</div><div class="summary-stat-label">Days Active</div></div>
+        <div class="summary-stat"><div class="summary-stat-value">3</div><div class="summary-stat-label">Paths</div></div>
+      </div>
+      
+      <div class="assets-section">
+        <div class="section-subtitle">Required Assets</div>
+        <ul class="asset-list">
+          <li><strong>Day 0:</strong> Welcome banner image, Product hero image</li>
+          <li><strong>Day 1:</strong> Educational infographic</li>
+          <li><strong>Day 2:</strong> Testimonial image</li>
+          <li><strong>Day 3:</strong> Offer banner</li>
+        </ul>
+      </div>
+      
+      <div class="urls-section">
+        <div class="section-subtitle">Key URLs Used</div>
+        <ul class="url-list">
+          <li><strong>Product Page:</strong> <a href="#">{brief['main_product_url']}</a></li>
+          <li><strong>Application:</strong> <a href="#">{brief['application_url']}</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    [Company Name] [Journey Name] | {platform['platform']} WhatsApp Automation | Version 1.0
+  </div>
+</body>
+</html>
+```
 
-**REQUIRED SECTIONS:**
+---
 
-1. **Journey Header** - Title, subtitle, key metrics row
+## CRITICAL: DO NOT INCLUDE
 
-2. **Day-by-Day Breakdown** - For each day:
-   - **Full-width Day Header Rectangle** with day name, duration, purpose
-   - **Step Cards** with:
-     - Step number and title
-     - Send timing
-     - Message type badge
-     - **Full message copy** (header, body, footer with character counts)
-     - **Buttons with full URLs displayed**
-     - **Call-to-Actions with full URLs**
-     - Media/Assets section
-     - Auto-Reply sections (for interactive steps)
-     - Wait time to next step
-
-3. **Complete Journey Summary Card** - Full width card containing:
-   - Summary metrics
-   - **Required Assets List** (all assets needed)
-   - **Key URLs Used** (all URLs with purposes)
-   - **DO NOT include:** "Ready for Implementation" or "WATI Technical Specifications"
+1. **NO EMOJIS** - Not in titles, content, buttons, anywhere
+2. **NO ICONS** - No FontAwesome, no icon fonts, no SVG icons
+3. **NO PINK/PURPLE** - Stick to the blue/orange/white color scheme
+4. **NO GRADIENTS** on cards (only on the main header)
+5. **NO "Implementation Notes"** section
+6. **NO "WATI Technical Specifications"** section
+7. **NO "Ready for Implementation"** checklist
+8. **NO decorative elements** - Keep it clean and professional
 
 ---
 
 ## OUTPUT FORMAT
 
-Output your response in this order:
+Output your response in this exact order with these exact delimiters:
 
 ```text
 === CONFIG YAML ===
-(normalized CONFIG object)
+(normalized CONFIG object in YAML format)
 
 === JOURNEY MARKDOWN ===
-(journey specification in markdown)
+(complete journey specification in markdown)
 
 === HTML A – SUMMARY WORKFLOW ===
 ```file:summary_workflow.html
-(complete HTML document)
+(complete HTML document following the EXACT structure above)
 ```
 
 === HTML B – FULL DETAIL WORKFLOW ===
 ```file:full_detail_workflow.html
-(complete HTML document)
+(complete HTML document following the EXACT structure above)
 ```
 ```
 

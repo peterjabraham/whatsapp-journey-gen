@@ -449,47 +449,49 @@
                         <!-- Visual Identity -->
                         <div class="subsection">
                             <h3>Visual Identity</h3>
+                            <p class="help-text">Either provide a URL to extract colors from, OR enter colors manually below</p>
                             
                             <div class="form-group">
                                 <label for="colors_from_url">
                                     Extract Colors from URL
-                                    <span class="tooltip" data-tip="Enter a URL to scan for brand colors">?</span>
+                                    <span class="tooltip" data-tip="Enter a URL to scan for brand colors. If provided, manual colors are optional.">?</span>
                                 </label>
                                 <div class="input-with-button">
-                                    <input type="url" id="colors_from_url" name="colors_from_url" placeholder="https://example.com">
+                                    <input type="url" id="colors_from_url" name="colors_from_url" placeholder="https://example.com" onchange="updateColorRequirements()">
                                     <button type="button" class="btn-scan" onclick="scanUrlForColors()">Scan</button>
                                 </div>
                                 <div id="colorScanResult" class="color-scan-result"></div>
                             </div>
                             
-                            <div class="form-row three-col">
+                            <div class="form-row three-col" id="manualColorsSection">
                                 <div class="form-group">
                                     <label for="primary_color">
-                                        Primary Color <span class="required">*</span>
-                                        <span class="tooltip" data-tip="HEX code e.g., #315891">?</span>
+                                        Primary Color <span class="required color-required">*</span>
+                                        <span class="tooltip" data-tip="HEX code e.g., #1e3a5f (dark blue)">?</span>
                                     </label>
-                                    <input type="text" id="primary_color" name="primary_color" required placeholder="#315891" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
+                                    <input type="text" id="primary_color" name="primary_color" placeholder="#1e3a5f" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
                                     <div class="color-preview" id="primary_preview"></div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="accent_color">
-                                        Accent Color <span class="required">*</span>
-                                        <span class="tooltip" data-tip="HEX code for accent/CTA color">?</span>
+                                        Accent Color <span class="required color-required">*</span>
+                                        <span class="tooltip" data-tip="HEX code for accent/CTA color e.g., #e67e22 (orange)">?</span>
                                     </label>
-                                    <input type="text" id="accent_color" name="accent_color" required placeholder="#D44437" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
+                                    <input type="text" id="accent_color" name="accent_color" placeholder="#e67e22" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
                                     <div class="color-preview" id="accent_preview"></div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="background_color">
-                                        Background Color <span class="required">*</span>
-                                        <span class="tooltip" data-tip="HEX code for background">?</span>
+                                        Background Color <span class="required color-required">*</span>
+                                        <span class="tooltip" data-tip="HEX code for background e.g., #f5f7fa (light gray)">?</span>
                                     </label>
-                                    <input type="text" id="background_color" name="background_color" required placeholder="#E9E9E9" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
+                                    <input type="text" id="background_color" name="background_color" placeholder="#f5f7fa" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
                                     <div class="color-preview" id="background_preview"></div>
                                 </div>
                             </div>
+                            <p class="help-text" id="colorHelpText">If you don't provide colors, professional defaults (dark blue, orange, light gray) will be used.</p>
                             
                             <div class="form-group">
                                 <label for="logo_reference">
@@ -1096,13 +1098,42 @@
             if (index < fields.length) {
                 document.getElementById(fields[index]).value = color;
                 updateColorPreviews();
+                updateChecklist();
             }
+        }
+
+        // ==========================================
+        // Color requirements based on URL
+        // ==========================================
+        function updateColorRequirements() {
+            const hasUrl = !!document.getElementById('colors_from_url').value.trim();
+            const colorRequiredIndicators = document.querySelectorAll('.color-required');
+            
+            // Update the visual indicators
+            colorRequiredIndicators.forEach(el => {
+                el.style.display = hasUrl ? 'none' : 'inline';
+            });
+            
+            // Update help text
+            const helpText = document.getElementById('colorHelpText');
+            if (hasUrl) {
+                helpText.textContent = 'URL provided - colors will be extracted or defaults will be used.';
+            } else {
+                helpText.textContent = 'If you don\'t provide colors, professional defaults (dark blue, orange, light gray) will be used.';
+            }
+            
+            updateChecklist();
         }
 
         // ==========================================
         // Validation checklist
         // ==========================================
         function updateChecklist() {
+            // Colors are valid if URL is provided OR if manual colors are entered
+            const hasColorUrl = !!document.getElementById('colors_from_url').value.trim();
+            const hasManualColors = !!(document.getElementById('primary_color').value.trim() && document.getElementById('accent_color').value.trim());
+            const colorsValid = hasColorUrl || hasManualColors;
+            
             const checks = {
                 'product_name': !!document.getElementById('product_name').value.trim(),
                 'company_name': !!document.getElementById('company_name').value.trim(),
@@ -1111,7 +1142,7 @@
                 'main_url': !!document.getElementById('main_product_url').value.trim(),
                 'form_url': !!document.getElementById('application_url').value.trim(),
                 'timing': !!(document.getElementById('step1_to_2_delay').value.trim() && document.getElementById('day1_start').value.trim()),
-                'colors': !!(document.getElementById('primary_color').value.trim() && document.getElementById('accent_color').value.trim()),
+                'colors': colorsValid,  // Now checks URL OR manual colors
                 'targets': !!document.getElementById('target_open_rate').value
             };
             
@@ -1242,6 +1273,7 @@
             togglePersonalizationFields();
             toggleEmojiStyle();
             toggleDisclaimerText();
+            updateColorRequirements();
             
             // Initialize checklist
             updateChecklist();
@@ -1257,6 +1289,9 @@
             
             // Open first accordion by default
             document.querySelector('.accordion-content').classList.add('open');
+            
+            // Add listener for color URL changes
+            document.getElementById('colors_from_url').addEventListener('input', updateColorRequirements);
         });
     </script>
 </body>

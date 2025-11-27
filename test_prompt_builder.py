@@ -159,10 +159,10 @@ class TestPromptBuilder(unittest.TestCase):
         
         result = generate_prompt_markdown(form_data)
         
-        self.assertIn('Summary Workflow HTML Requirements', result)
-        self.assertIn('Full Detail Workflow HTML Requirements', result)
-        self.assertIn('NO emojis or icons', result)
-        self.assertIn('maximum of 3 colors', result)
+        self.assertIn('SUMMARY WORKFLOW HTML - EXACT STRUCTURE', result)
+        self.assertIn('FULL DETAIL WORKFLOW HTML - EXACT STRUCTURE', result)
+        self.assertIn('NO emojis', result)
+        self.assertIn('NO EMOJIS', result)
 
     def test_generate_prompt_markdown_with_segmentation(self):
         """Test prompt generation with segmentation options."""
