@@ -211,19 +211,38 @@ You are an expert **WhatsApp journey + marketing automation architect** speciali
 - B2C consumer acquisition journeys
 - Multi-day promotional and educational flows
 
+## CRITICAL: USE ONLY THE DATA PROVIDED
+
+**YOU MUST USE ONLY the information provided in Section 1 (BRIEF) below.**
+
+- Company Name: **{brief['company_name']}** - use this exact name
+- Product Name: **{brief['product_name']}** - use this exact name
+- Target Audience: **{brief['audience_description']}** - use this exact description
+- Campaign Offer: **{brief['campaign_offer']}** - use this exact offer
+- Main URL: **{brief['main_product_url']}** - use this exact URL in CTA buttons
+- Application URL: **{brief['application_url']}** - use this exact URL in CTA buttons
+- Assets Required: **{brief['assets_list']}** - use these exact assets
+
+**DO NOT INVENT:**
+- Do not create fictional company names, product names, or industries
+- Do not invent URLs - use ONLY the URLs provided above
+- Do not make up assets - use ONLY the assets listed above
+- Do not add emojis or icons anywhere
+
 Your job:
 1. Take the structured input fields below.
-2. Build a normalised `CONFIG` object.
+2. Build a normalised `CONFIG` object using ONLY the provided data.
 3. Generate:
    - Journey Markdown specs (.md) for each journey.
    - HTML visualisations:
-     - A) Summary Workflow HTML (structure overview with key metrics)
+     - A) Summary Workflow HTML (structure overview)
      - B) Full Detail Workflow HTML (complete step-by-step journey with all copy)
 
 All journeys must:
 - Respect **{platform['platform']} message/character limits**.
 - Follow the specified **timeline & structure**.
 - Use **brand voice** and **offer** provided.
+- Use ONLY the URLs and assets provided in the BRIEF section.
 
 ---
 
@@ -659,25 +678,25 @@ All journeys must:
 </head>
 <body>
   <div class="header">
-    <h1>[Product] [Journey Name]</h1>
-    <p class="subtitle">[Subtitle - e.g., "First-Time Saver Onboarding - Summary Workflow"]</p>
+    <h1>{brief['company_name']} {brief['product_name']} Journey</h1>
+    <p class="subtitle">{brief['campaign_name'] or brief['product_name']} - Summary Workflow</p>
     <div class="metrics-row">
-      <div class="metric"><div class="metric-label">Duration</div><div class="metric-value">4 Days</div></div>
-      <div class="metric"><div class="metric-label">Total Steps</div><div class="metric-value">11</div></div>
-      <div class="metric"><div class="metric-label">Decision Points</div><div class="metric-value">1</div></div>
-      <div class="metric"><div class="metric-label">Paths</div><div class="metric-value">3</div></div>
+      <div class="metric"><div class="metric-label">Duration</div><div class="metric-value">[X] Days</div></div>
+      <div class="metric"><div class="metric-label">Total Steps</div><div class="metric-value">[X]</div></div>
+      <div class="metric"><div class="metric-label">Decision Points</div><div class="metric-value">[X]</div></div>
+      <div class="metric"><div class="metric-label">Paths</div><div class="metric-value">[X]</div></div>
     </div>
   </div>
   
   <div class="container">
-    <!-- Journey Overview Card -->
+    <!-- Journey Overview Card - USE EXACT DATA FROM BRIEF -->
     <div class="card">
       <div class="card-title">Journey Overview</div>
       <div class="overview-grid">
-        <div class="overview-item"><h4>Entry Point</h4><p>[Entry point details]</p></div>
-        <div class="overview-item"><h4>Target Audience</h4><p>[Audience details]</p></div>
-        <div class="overview-item"><h4>Primary Goal</h4><p>[Goal details]</p></div>
-        <div class="overview-item"><h4>Offer Code</h4><p>[Offer code]</p></div>
+        <div class="overview-item"><h4>Entry Point</h4><p>{brief['entry_point']}</p></div>
+        <div class="overview-item"><h4>Target Audience</h4><p>{brief['audience_description']}</p></div>
+        <div class="overview-item"><h4>Primary Goal</h4><p>Convert to {brief['product_name']}</p></div>
+        <div class="overview-item"><h4>Offer</h4><p>{brief['campaign_offer']}</p></div>
       </div>
     </div>
     
@@ -742,56 +761,47 @@ All journeys must:
           </tr>
         </thead>
         <tbody>
+          <!-- USE THESE EXACT URLs FROM USER INPUT -->
           <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">[Full URL from user input]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">{brief['main_product_url']}</td>
             <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Main product/service page</td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 0 Step 1, Day 1 Step 4</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[List all steps using this URL]</td>
           </tr>
           <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">[Application/Form URL from user input]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">{brief['application_url']}</td>
             <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Application/conversion form</td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 2 Step 6, Day 3 Step 9</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[List all steps using this URL]</td>
           </tr>
-          <!-- Add all URLs provided by user -->
         </tbody>
       </table>
     </div>
     
-    <!-- Assets Required - REQUIRED SECTION -->
+    <!-- Assets Required - USE ASSETS FROM USER INPUT: {brief['assets_list']} -->
     <div class="card">
       <div class="card-title">Assets Required for Campaign</div>
+      <p style="color: #6b7280; margin-bottom: 15px; font-size: 14px;">Assets provided by user: {brief['assets_list']}</p>
       <table style="width:100%; border-collapse: collapse;">
         <thead>
           <tr style="background: {brand['primary_color']}10; text-align: left;">
-            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Asset Type</th>
-            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Description</th>
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Asset</th>
+            <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Type</th>
             <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Used In</th>
           </tr>
         </thead>
         <tbody>
+          <!-- Create a row for EACH asset from: {brief['assets_list']} -->
           <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>Image</strong></td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[Asset from user's assets list]</td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 0 Step 1 - Welcome message</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[Asset name from list above]</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Image/PDF/Video</td>
+            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[List steps where used]</td>
           </tr>
-          <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>PDF</strong></td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[Asset from user's assets list]</td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 1 Step 4 - Product guide</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>Video</strong></td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">[Asset from user's assets list]</td>
-            <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">Day 2 Step 7 - Testimonial</td>
-          </tr>
-          <!-- List ALL assets from user's Required Assets input -->
         </tbody>
       </table>
     </div>
   </div>
   
   <div class="footer">
-    [Company Name] [Journey Name] | {platform['platform']} WhatsApp Automation | Version 1.0
+    {brief['company_name']} | {brief['product_name']} Journey | {platform['platform']} WhatsApp Automation
   </div>
 </body>
 </html>
@@ -1073,15 +1083,15 @@ All journeys must:
   </style>
 </head>
 <body>
-  <!-- Same header structure -->
+  <!-- Header - USE EXACT DATA FROM BRIEF -->
   <div class="header">
-    <h1>[Product] [Journey Name]</h1>
+    <h1>{brief['company_name']} {brief['product_name']} Journey</h1>
     <p class="subtitle">Full Detailed Workflow - Complete Message Content</p>
     <div class="metrics-row">
-      <div class="metric"><div class="metric-label">Total Messages</div><div class="metric-value">11</div></div>
-      <div class="metric"><div class="metric-label">Interactive</div><div class="metric-value">4</div></div>
-      <div class="metric"><div class="metric-label">Days</div><div class="metric-value">4</div></div>
-      <div class="metric"><div class="metric-label">Hours</div><div class="metric-value">96</div></div>
+      <div class="metric"><div class="metric-label">Total Messages</div><div class="metric-value">[X]</div></div>
+      <div class="metric"><div class="metric-label">Interactive</div><div class="metric-value">[X]</div></div>
+      <div class="metric"><div class="metric-label">Days</div><div class="metric-value">[X]</div></div>
+      <div class="metric"><div class="metric-label">Hours</div><div class="metric-value">[X]</div></div>
     </div>
   </div>
   
@@ -1131,23 +1141,23 @@ All journeys must:
           <div class="char-count">Characters: 20/60</div>
         </div>
         
-        <!-- CALL TO ACTION BUTTONS - REQUIRED: Show button text AND full URL -->
+        <!-- CALL TO ACTION BUTTONS - Show button text AND the FULL URL -->
         <div class="buttons-section">
           <div class="message-label">Call to Action Buttons</div>
           <div class="button-item">
-            <div class="button-text">[CTA Button Text - e.g., "Learn More"]</div>
-            <div class="button-url">[FULL URL from user input - e.g., {brief['main_product_url']}]</div>
+            <div class="button-text">Learn More</div>
+            <div class="button-url">{brief['main_product_url']}</div>
           </div>
           <div class="button-item">
-            <div class="button-text">[CTA Button Text - e.g., "Apply Now"]</div>
-            <div class="button-url">[FULL URL from user input - e.g., {brief['application_url']}]</div>
+            <div class="button-text">Apply Now</div>
+            <div class="button-url">{brief['application_url']}</div>
           </div>
         </div>
         
-        <!-- ASSET USED IN THIS STEP -->
+        <!-- ASSET USED IN THIS STEP - from user's assets list: {brief['assets_list']} -->
         <div style="margin-top: 15px; padding: 12px; background: #f3f4f6; border-radius: 8px;">
           <div class="message-label">Asset Used</div>
-          <div style="color: #4b5563;">[Asset type]: [Asset name from user input]</div>
+          <div style="color: #4b5563;">[Asset from: {brief['assets_list']}]</div>
         </div>
       </div>
     </div>
@@ -1171,38 +1181,65 @@ All journeys must:
          4. Wait Indicators between steps
     -->
     
-    <!-- Complete Journey Summary -->
+    <!-- Complete Journey Summary - REQUIRED AT BOTTOM -->
     <div class="summary-card">
       <div class="summary-title">Complete Journey Summary</div>
       <div class="summary-grid">
-        <div class="summary-stat"><div class="summary-stat-value">11</div><div class="summary-stat-label">Total Steps</div></div>
-        <div class="summary-stat"><div class="summary-stat-value">1</div><div class="summary-stat-label">Decision Points</div></div>
-        <div class="summary-stat"><div class="summary-stat-value">4</div><div class="summary-stat-label">Days Active</div></div>
-        <div class="summary-stat"><div class="summary-stat-value">3</div><div class="summary-stat-label">Paths</div></div>
+        <div class="summary-stat"><div class="summary-stat-value">[X]</div><div class="summary-stat-label">Total Steps</div></div>
+        <div class="summary-stat"><div class="summary-stat-value">[X]</div><div class="summary-stat-label">Decision Points</div></div>
+        <div class="summary-stat"><div class="summary-stat-value">[X]</div><div class="summary-stat-label">Days Active</div></div>
+        <div class="summary-stat"><div class="summary-stat-value">[X]</div><div class="summary-stat-label">Paths</div></div>
       </div>
       
+      <!-- COMPLETE ASSETS LIST - List ALL assets from user input -->
       <div class="assets-section">
-        <div class="section-subtitle">Required Assets</div>
-        <ul class="asset-list">
-          <li><strong>Day 0:</strong> Welcome banner image, Product hero image</li>
-          <li><strong>Day 1:</strong> Educational infographic</li>
-          <li><strong>Day 2:</strong> Testimonial image</li>
-          <li><strong>Day 3:</strong> Offer banner</li>
-        </ul>
+        <div class="section-subtitle">Complete Assets Required</div>
+        <p style="color: #6b7280; margin-bottom: 10px;">Assets from user input: {brief['assets_list']}</p>
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: {brand['primary_color']}10;">
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;">Asset</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;">Type</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;">Used In</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- List each asset from {brief['assets_list']} -->
+            <tr><td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">[Asset 1]</td><td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">Image/PDF/Video</td><td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">Day X Step Y</td></tr>
+          </tbody>
+        </table>
       </div>
       
+      <!-- COMPLETE URL LIST - List ALL URLs from user input -->
       <div class="urls-section">
-        <div class="section-subtitle">Key URLs Used</div>
-        <ul class="url-list">
-          <li><strong>Product Page:</strong> <a href="#">{brief['main_product_url']}</a></li>
-          <li><strong>Application:</strong> <a href="#">{brief['application_url']}</a></li>
-        </ul>
+        <div class="section-subtitle">Complete URL List</div>
+        <table style="width:100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: {brand['primary_color']}10;">
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;">URL</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;">Purpose</th>
+              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb;">Used In</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">{brief['main_product_url']}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">Main product page</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">[List steps]</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: {brand['primary_color']}; word-break: break-all;">{brief['application_url']}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">Application form</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">[List steps]</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
   
   <div class="footer">
-    [Company Name] [Journey Name] | {platform['platform']} WhatsApp Automation | Version 1.0
+    {brief['company_name']} | {brief['product_name']} Journey | {platform['platform']} WhatsApp Automation
   </div>
 </body>
 </html>
@@ -1212,24 +1249,44 @@ All journeys must:
 
 ## CRITICAL: DO NOT DO THE FOLLOWING
 
-1. **DO NOT MAKE UP DATA** - Use ONLY the company name, product name, URLs, assets, and other details provided by the user. Never invent industries, company names, product names, or URLs.
-2. **NO EMOJIS** - Not in titles, content, buttons, anywhere
-3. **NO ICONS** - No FontAwesome, no icon fonts, no SVG icons
-4. **NO PINK/PURPLE** - Stick to the blue/orange/white color scheme
-5. **NO GRADIENTS** on cards (only on the main header)
-6. **NO "Implementation Notes"** section
-7. **NO "WATI Technical Specifications"** section
-8. **NO "Ready for Implementation"** checklist
-9. **NO decorative elements** - Keep it clean and professional
-10. **NO placeholder URLs** like "example.com" - Use the actual URLs provided in the user input
+1. **DO NOT INVENT OR MAKE UP ANY DATA** - Use ONLY the exact data from Section 1 BRIEF:
+   - Company: {brief['company_name']}
+   - Product: {brief['product_name']}
+   - Audience: {brief['audience_description']}
+   - URLs: {brief['main_product_url']} and {brief['application_url']}
+   - Assets: {brief['assets_list']}
+2. **NO EMOJIS** - Absolutely no emojis anywhere in the HTML output
+3. **NO ICONS** - No FontAwesome, no icon fonts, no SVG icons, no decorative icons
+4. **NO "Success Metrics & KPIs"** section
+5. **NO "Implementation Notes"** section
+6. **NO "WATI Technical Specifications"** section
+7. **NO "Ready for Implementation"** checklist
+8. **NO PINK/PURPLE colors** - Stick to the blue/orange/white color scheme only
+9. **NO GRADIENTS** on cards (only on the main header)
+10. **NO placeholder URLs** - Never use "example.com" - use the actual URLs provided
+11. **NO invented use cases** - Use only what the user described in the BRIEF
 
-## CRITICAL: YOU MUST INCLUDE
+## CRITICAL: YOU MUST INCLUDE IN BOTH HTML FILES
 
-1. **URL Links Used** - Summary Workflow must have a table at the bottom listing ALL URLs from user input, showing where each is used
-2. **Assets Required** - Summary Workflow must have a table listing ALL assets from user input (images, PDFs, videos, etc.) and where used
-3. **CTA Buttons with Full URLs** - Full Detail Workflow must show Call to Action buttons with the COMPLETE URL displayed below each button
-4. **Day Assets** - Full Detail Workflow must show which assets are needed for EACH day at the start of each day section
-5. **Step Assets** - Full Detail Workflow should indicate which asset is used in each step that requires media
+### In EVERY CTA Button:
+- The button text
+- The FULL URL displayed below the button (from user's input: {brief['main_product_url']} or {brief['application_url']})
+
+### At the BOTTOM of BOTH HTML files, include these two sections:
+
+**1. Complete URL List:**
+| URL | Purpose | Used In Steps |
+|-----|---------|---------------|
+| {brief['main_product_url']} | Main product/service page | [list which steps] |
+| {brief['application_url']} | Application/conversion | [list which steps] |
+
+**2. Complete Assets List:**
+| Asset | Type | Used In Steps |
+|-------|------|---------------|
+| [Each item from: {brief['assets_list']}] | Image/PDF/Video | [list which steps] |
+
+### Within each Day section of Full Detail Workflow:
+- Show which assets from the list above are used in that day's messages
 
 ---
 
