@@ -14,6 +14,11 @@
     --ring: hsl(202.8169 89.1213% 53.1373%);
     --radius: 1.3rem;
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    
+    /* Accent colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
 }
 
 * {
@@ -34,6 +39,10 @@ body {
 .container {
     max-width: 900px;
     margin: 0 auto;
+}
+
+.container.wide {
+    max-width: 1100px;
 }
 
 /* Header Styles */
@@ -136,42 +145,175 @@ main {
     font-weight: 600;
 }
 
+/* Required indicator */
+.required-indicator {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.required {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+/* ==========================================
+   Accordion Styles
+   ========================================== */
+.accordion-section {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.accordion-section:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    transition: background 0.3s;
+}
+
+.accordion-header:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.accordion-header h2 {
+    color: white;
+    font-size: 1.25em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.accordion-icon {
+    color: white;
+    font-size: 0.9em;
+    transition: transform 0.3s;
+}
+
+.accordion-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.3s;
+    padding: 0 25px;
+}
+
+.accordion-content.open {
+    max-height: 3000px;
+    padding: 25px;
+}
+
+/* Subsections within accordions */
+.subsection {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.subsection:last-child {
+    margin-bottom: 0;
+}
+
+.subsection h3 {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.subsection h4 {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1em;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 12px;
+}
+
+/* ==========================================
+   Form Layouts
+   ========================================== */
+.form-row {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-row.two-col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.form-row.three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 768px) {
+    .form-row.two-col,
+    .form-row.three-col {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Form Styles */
 .form-group {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+}
+
+.form-row .form-group {
+    margin-bottom: 0;
 }
 
 label {
     display: block;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     color: white;
-    font-size: 1em;
+    font-size: 0.95em;
 }
 
 input[type="text"],
 input[type="url"],
 input[type="number"],
+input[type="date"],
+input[type="email"],
 select {
     width: 100%;
     padding: 12px 15px;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    font-size: 1em;
+    border-radius: 10px;
+    font-size: 0.95em;
     color: white;
     transition: all 0.3s;
 }
 
 input[type="text"]::placeholder,
-input[type="url"]::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+input[type="url"]::placeholder,
+input[type="email"]::placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 input[type="text"]:focus,
 input[type="url"]:focus,
 input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="email"]:focus,
 select:focus {
     outline: none;
     border-color: rgba(102, 126, 234, 0.8);
@@ -179,7 +321,522 @@ select:focus {
     background: rgba(255, 255, 255, 0.15);
 }
 
-/* File Upload Area */
+/* Select dropdown styling */
+select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 35px;
+}
+
+select option {
+    background: #2a2a40;
+    color: white;
+}
+
+/* Textarea */
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-size: 0.95em;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    color: white;
+    transition: all 0.3s;
+}
+
+textarea.small {
+    min-height: 60px;
+    margin-top: 8px;
+}
+
+textarea.large {
+    min-height: 150px;
+}
+
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.8);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Help Text */
+.help-text {
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 6px;
+    font-style: italic;
+}
+
+/* ==========================================
+   Tooltips
+   ========================================== */
+.tooltip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-left: 6px;
+    cursor: help;
+    position: relative;
+    color: rgba(255, 255, 255, 0.8);
+    vertical-align: middle;
+}
+
+.tooltip:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: normal;
+    font-style: normal;
+    white-space: nowrap;
+    max-width: 280px;
+    white-space: normal;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    z-index: 1001;
+}
+
+/* ==========================================
+   Dynamic Lists
+   ========================================== */
+.dynamic-list {
+    margin-top: 10px;
+}
+
+.list-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.list-item input {
+    flex: 1;
+}
+
+.btn-add,
+.btn-remove {
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-add {
+    background: rgba(16, 185, 129, 0.3);
+}
+
+.btn-add:hover {
+    background: rgba(16, 185, 129, 0.5);
+    transform: translateY(-1px);
+}
+
+.btn-remove {
+    background: rgba(244, 67, 54, 0.3);
+    flex-shrink: 0;
+}
+
+.btn-remove:hover {
+    background: rgba(244, 67, 54, 0.5);
+    transform: translateY(-1px);
+}
+
+/* ==========================================
+   Checkbox Styles
+   ========================================== */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.checkbox-group.vertical {
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .checkbox-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.checkbox-item,
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    cursor: pointer;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.checkbox-item:hover,
+.checkbox-label:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.checkbox-item input[type="checkbox"],
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.checkbox-item label,
+.checkbox-label {
+    color: white;
+    font-weight: normal;
+    margin: 0;
+}
+
+.checkbox-label.locked {
+    opacity: 0.7;
+}
+
+/* ==========================================
+   Timing Presets
+   ========================================== */
+.timing-presets {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.timing-presets label {
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.preset-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-preset {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-preset:hover {
+    background: rgba(102, 126, 234, 0.4);
+    border-color: rgba(102, 126, 234, 0.6);
+    transform: translateY(-1px);
+}
+
+/* ==========================================
+   Input with Button / Suffix
+   ========================================== */
+.input-with-button {
+    display: flex;
+    gap: 10px;
+}
+
+.input-with-button input {
+    flex: 1;
+}
+
+.btn-scan {
+    padding: 12px 20px;
+    background: rgba(102, 126, 234, 0.5);
+    border: 1px solid rgba(102, 126, 234, 0.6);
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.btn-scan:hover {
+    background: rgba(102, 126, 234, 0.7);
+}
+
+.input-with-suffix {
+    display: flex;
+    align-items: center;
+}
+
+.input-with-suffix input {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-with-suffix .suffix {
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    color: white;
+    font-weight: 600;
+}
+
+/* ==========================================
+   Color Preview & Extraction
+   ========================================== */
+.color-preview {
+    width: 100%;
+    height: 30px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: none;
+}
+
+.color-scan-result {
+    margin-top: 12px;
+    font-size: 0.9em;
+}
+
+.color-scan-result .loading {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.color-scan-result .success {
+    color: var(--success);
+}
+
+.color-scan-result .warning {
+    color: var(--warning);
+}
+
+.color-scan-result .error {
+    color: var(--error);
+}
+
+.extracted-colors {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.color-swatch {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+    border-color: white;
+}
+
+/* ==========================================
+   Validation Checklist
+   ========================================== */
+.validation-checklist {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+}
+
+.validation-checklist h3 {
+    color: white;
+    font-size: 1em;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.checklist-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+.checklist-item .check-icon::before {
+    content: '○';
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.checklist-item.checked {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(16, 185, 129, 0.2);
+}
+
+.checklist-item.checked .check-icon::before {
+    content: '✓';
+    color: var(--success);
+}
+
+/* ==========================================
+   Character Counter
+   ========================================== */
+.char-counter {
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: right;
+    margin-top: 4px;
+}
+
+.char-counter.warning {
+    color: var(--warning);
+}
+
+.char-counter.error {
+    color: var(--error);
+}
+
+/* ==========================================
+   Calculated Fields
+   ========================================== */
+.calculated-field {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.calculated-value {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: white;
+    margin-top: 8px;
+}
+
+/* ==========================================
+   Info Box
+   ========================================== */
+.info-box {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.info-box h3 {
+    border-bottom-color: rgba(102, 126, 234, 0.3);
+}
+
+.info-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-box li {
+    color: rgba(255, 255, 255, 0.9);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-box li:last-child {
+    border-bottom: none;
+}
+
+/* ==========================================
+   Locked Fields
+   ========================================== */
+.form-group.locked label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-group.locked input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   Submit Section
+   ========================================== */
+.submit-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.validation-error {
+    color: var(--error);
+    font-size: 0.95em;
+    margin-top: 15px;
+    display: none;
+}
+
+/* ==========================================
+   File Upload Area (Original)
+   ========================================== */
 .file-upload-area {
     position: relative;
     border: 2px dashed rgba(255, 255, 255, 0.3);
@@ -240,7 +897,9 @@ select:focus {
     margin-top: 10px;
 }
 
-/* Models List */
+/* ==========================================
+   Models List (Original)
+   ========================================== */
 .models-list {
     display: grid;
     gap: 12px;
@@ -300,10 +959,12 @@ select:focus {
     margin-top: 5px;
 }
 
-/* Buttons */
+/* ==========================================
+   Buttons
+   ========================================== */
 .btn-primary {
     width: 100%;
-    padding: 15px 30px;
+    padding: 16px 30px;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -346,7 +1007,9 @@ select:focus {
     }
 }
 
-/* Messages */
+/* ==========================================
+   Messages
+   ========================================== */
 .error-message,
 .success-message {
     margin-top: 20px;
@@ -384,7 +1047,9 @@ select:focus {
     border: 1px solid rgba(244, 67, 54, 0.4);
 }
 
-/* Form Section (Prompt Builder) */
+/* ==========================================
+   Form Section (Old - kept for compatibility)
+   ========================================== */
 .form-section {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(15px);
@@ -412,111 +1077,9 @@ select:focus {
     font-weight: 600;
 }
 
-textarea {
-    width: 100%;
-    padding: 12px 15px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    font-size: 1em;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 80px;
-    color: white;
-    transition: all 0.3s;
-}
-
-textarea::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-textarea:focus {
-    outline: none;
-    border-color: rgba(102, 126, 234, 0.8);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.help-text {
-    font-size: 0.85em;
-    color: rgba(255, 255, 255, 0.7);
-    margin-top: 5px;
-    font-style: italic;
-}
-
-.dynamic-list {
-    margin-top: 10px;
-}
-
-.list-item {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    align-items: center;
-}
-
-.list-item input {
-    flex: 1;
-}
-
-.btn-add,
-.btn-remove {
-    padding: 8px 15px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9em;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-add {
-    background: rgba(16, 185, 129, 0.3);
-}
-
-.btn-add:hover {
-    background: rgba(16, 185, 129, 0.5);
-    transform: translateY(-1px);
-}
-
-.btn-remove {
-    background: rgba(244, 67, 54, 0.3);
-}
-
-.btn-remove:hover {
-    background: rgba(244, 67, 54, 0.5);
-    transform: translateY(-1px);
-}
-
-.checkbox-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 10px;
-}
-
-.checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.checkbox-item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary);
-}
-
-.checkbox-item label {
-    color: white;
-    font-weight: normal;
-    margin: 0;
-}
-
-/* Custom Scrollbar */
+/* ==========================================
+   Custom Scrollbar
+   ========================================== */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -535,19 +1098,36 @@ textarea:focus {
     background: rgba(255, 255, 255, 0.5);
 }
 
-/* Responsive Design */
+/* ==========================================
+   Responsive Design
+   ========================================== */
 @media (max-width: 768px) {
     header h1 {
         font-size: 2em;
     }
 
-    main,
-    .form-section {
+    main {
         padding: 20px;
+    }
+    
+    .accordion-content.open {
+        padding: 20px;
+    }
+    
+    .subsection {
+        padding: 15px;
     }
 
     .file-upload-area {
         padding: 30px 15px;
+    }
+    
+    .validation-checklist {
+        position: static;
+    }
+    
+    .checklist-items {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -566,5 +1146,17 @@ textarea:focus {
 
     .container {
         max-width: 100%;
+    }
+    
+    .checklist-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .preset-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-preset {
+        width: 100%;
     }
 }

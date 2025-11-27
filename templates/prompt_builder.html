@@ -10,290 +10,822 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="container wide">
         <header>
             <a href="/" class="nav-link">← Back to Journey Generator</a>
-            <h1>Prompt Builder</h1>
-            <p class="subtitle">Fill in the details below to generate your prompt.md file</p>
-            <p class="subtitle" style="margin-top: 10px; font-size: 0.95em;">Once you have your prompt .md file, move on to the Journey Generator.</p>
+            <h1>WhatsApp Journey Prompt Builder</h1>
+            <p class="subtitle">Complete this form to generate your customised prompt file</p>
         </header>
 
         <main>
             <div class="info-banner">
-                <strong>📝 Step 1: Build Your Prompt</strong>
+                <strong>Step 1: Build Your Prompt</strong>
                 <p>
-                    Fill out all the fields below to create your custom prompt.md file. 
-                    This file will contain all the details about your brand, timeline, and journey requirements. 
-                    Once generated, you can download the prompt.md file and use it in the 
-                    <a href="/">Journey Generator</a> to create your WhatsApp journeys.
+                    Fill out all required fields marked with <span class="required-indicator">*</span> to create your custom prompt.md file. 
+                    Once generated, use it in the <a href="/">Journey Generator</a> to create your WhatsApp journeys.
                 </p>
             </div>
 
-            <form id="promptBuilderForm">
-                <!-- 0.1 CONTEXT -->
-                <div class="form-section">
-                    <h2>0.1 CONTEXT</h2>
-                    
-                    <div class="form-group">
-                        <label for="platform">Platform</label>
-                        <input type="text" id="platform" name="platform" value="WATI (WhatsApp marketing automation)" required>
-                        <div class="help-text">Example: WATI (WhatsApp marketing automation)</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="format">Format</label>
-                        <input type="text" id="format" name="format" value="B2C consumer acquisition journeys" required>
-                        <div class="help-text">Example: B2C consumer acquisition journeys</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="duration_overall">Duration (overall journey)</label>
-                        <input type="text" id="duration_overall" name="duration_overall" value="3 days + initial Day 0 (0-3 hours)" required>
-                        <div class="help-text">Example: 3 days + initial Day 0 (0-3 hours)</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="discount">Discount (describe clearly)</label>
-                        <input type="text" id="discount" name="discount" placeholder="15% OFF your first order / Free shipping / Tiered discount">
-                        <div class="help-text">Example: 15% OFF your first order / Free shipping / Tiered discount</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="brand_name">Brand Name</label>
-                        <input type="text" id="brand_name" name="brand_name" required>
-                        <div class="help-text">Example: Nike</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="industry">Industry</label>
-                        <input type="text" id="industry" name="industry" required>
-                        <div class="help-text">Example: Sportswear / Financial Services / Beauty</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Unique Selling Points (3-5 bullets)</label>
-                        <div id="uniqueSellingPointsList" class="dynamic-list"></div>
-                        <button type="button" class="btn-add" onclick="addListItem('uniqueSellingPointsList', 'unique_selling_points')">+ Add Point</button>
-                        <div class="help-text">What makes you different</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="brand_tone">Brand Tone of Voice</label>
-                        <textarea id="brand_tone" name="brand_tone" placeholder="Warm, direct, plain English, minimal emojis"></textarea>
-                        <div class="help-text">Example: "Warm, direct, plain English, minimal emojis", or URL to guidelines</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="brand_colours">Brand Colours</label>
-                        <textarea id="brand_colours" name="brand_colours" placeholder="Use brand colours from this URL: [URL] or list HEX codes like #667eea, #764ba2"></textarea>
-                        <div class="help-text">Example: "Use brand colours from this URL: [URL]" or list HEX codes</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="url_homepage">Homepage URL</label>
-                        <input type="url" id="url_homepage" name="url_homepage" placeholder="https://example.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Product Page URLs</label>
-                        <div id="productPagesList" class="dynamic-list"></div>
-                        <button type="button" class="btn-add" onclick="addListItem('productPagesList', 'url_product_pages')">+ Add URL</button>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Offer Page URLs</label>
-                        <div id="offerPagesList" class="dynamic-list"></div>
-                        <button type="button" class="btn-add" onclick="addListItem('offerPagesList', 'url_offer_pages')">+ Add URL</button>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Products</label>
-                        <div id="productsList" class="dynamic-list"></div>
-                        <button type="button" class="btn-add" onclick="addListItem('productsList', 'products')">+ Add Product</button>
-                        <div class="help-text">List your key products or product categories, or URLs</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="offer_text">The Offer (exact wording)</label>
-                        <textarea id="offer_text" name="offer_text" required></textarea>
-                        <div class="help-text">Example: Special Offer: Receive a £50 Amazon.co.uk Gift Card when you open a new Lifetime ISA by 19th December 2025.</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="quote_code">Quote Code</label>
-                        <input type="text" id="quote_code" name="quote_code" required>
-                        <div class="help-text">Example: Autumn25</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Example Testimonials (URLs)</label>
-                        <div id="testimonialsList" class="dynamic-list"></div>
-                        <button type="button" class="btn-add" onclick="addListItem('testimonialsList', 'url_testimonials')">+ Add URL</button>
-                        <div class="help-text">URLs to testimonials/case study pages</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="audience">Audience</label>
-                        <input type="text" id="audience" name="audience" required>
-                        <div class="help-text">Example: "UK police officers aged 25-45" / "Busy parents in London"</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="compliance">Compliance / Restrictions</label>
-                        <textarea id="compliance" name="compliance" placeholder="FCA-regulated; avoid guarantees"></textarea>
-                        <div class="help-text">Example: "FCA-regulated; avoid guarantees", "No medical claims", etc.</div>
-                    </div>
+            <!-- Final Validation Checklist -->
+            <div id="validationChecklist" class="validation-checklist">
+                <h3>Checklist</h3>
+                <div class="checklist-items">
+                    <div class="checklist-item" data-check="product_name"><span class="check-icon"></span> Product name</div>
+                    <div class="checklist-item" data-check="company_name"><span class="check-icon"></span> Company name</div>
+                    <div class="checklist-item" data-check="audience"><span class="check-icon"></span> Target audience</div>
+                    <div class="checklist-item" data-check="features"><span class="check-icon"></span> At least 2 features</div>
+                    <div class="checklist-item" data-check="main_url"><span class="check-icon"></span> Main product URL</div>
+                    <div class="checklist-item" data-check="form_url"><span class="check-icon"></span> Application/form URL</div>
+                    <div class="checklist-item" data-check="timing"><span class="check-icon"></span> Timing specified</div>
+                    <div class="checklist-item" data-check="colors"><span class="check-icon"></span> Brand colors</div>
+                    <div class="checklist-item" data-check="targets"><span class="check-icon"></span> Conversion targets</div>
                 </div>
+            </div>
 
-                <!-- 0.2 DELIVERABLES -->
-                <div class="form-section">
-                    <h2>0.2 DELIVERABLES NEEDED</h2>
-                    
-                    <div class="form-group">
-                        <label for="num_journeys">Number of journeys required (1-4 recommended)</label>
-                        <select id="num_journeys" name="num_journeys" required>
-                            <option value="1">1 Journey</option>
-                            <option value="2">2 Journeys</option>
-                            <option value="3" selected>3 Journeys</option>
-                            <option value="4">4 Journeys</option>
-                        </select>
+            <form id="promptBuilderForm">
+                
+                <!-- SECTION 1: BRIEF -->
+                <div class="accordion-section" data-section="brief">
+                    <div class="accordion-header" onclick="toggleAccordion('brief')">
+                        <h2>1. BRIEF (Core Information)</h2>
+                        <span class="accordion-icon">▼</span>
                     </div>
-
-                    <div class="form-group">
-                        <label>Which deliverables do you want?</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="deliverable_1" name="deliverables[]" value="1" checked>
-                                <label for="deliverable_1">1. Journey Markdown Documents</label>
+                    <div class="accordion-content open">
+                        
+                        <!-- Product & Company Details -->
+                        <div class="subsection">
+                            <h3>Product & Company Details</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="product_name">
+                                        Product/Service Name <span class="required">*</span>
+                                        <span class="tooltip" data-tip="The name of the product or service being promoted">?</span>
+                                    </label>
+                                    <input type="text" id="product_name" name="product_name" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="company_name">
+                                        Company Name <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Your company or brand name">?</span>
+                                    </label>
+                                    <input type="text" id="company_name" name="company_name" required>
+                                </div>
                             </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="deliverable_2a" name="deliverables[]" value="2A" checked>
-                                <label for="deliverable_2a">2A. Summary Workflow HTML</label>
+                            
+                            <div class="form-group">
+                                <label for="campaign_name">
+                                    Campaign Name
+                                    <span class="tooltip" data-tip="Used for file naming and identification">?</span>
+                                </label>
+                                <input type="text" id="campaign_name" name="campaign_name" placeholder="e.g., Autumn 2025 Promo">
                             </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="deliverable_2b" name="deliverables[]" value="2B" checked>
-                                <label for="deliverable_2b">2B. Full Detail Workflow HTML</label>
+                        </div>
+                        
+                        <!-- Target Audience -->
+                        <div class="subsection">
+                            <h3>Target Audience</h3>
+                            
+                            <div class="form-group">
+                                <label for="audience_description">
+                                    Audience Description <span class="required">*</span>
+                                    <span class="tooltip" data-tip="Describe your target audience including age, profession, demographics">?</span>
+                                </label>
+                                <textarea id="audience_description" name="audience_description" required placeholder="e.g., UK Police Officers and staff aged 18-39 looking to save for their first home or retirement"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="age_range">
+                                        Age Range
+                                        <span class="tooltip" data-tip="e.g., 18-39, 25-45">?</span>
+                                    </label>
+                                    <input type="text" id="age_range" name="age_range" placeholder="e.g., 18-39">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="geographic_location">
+                                        Geographic Location
+                                        <span class="tooltip" data-tip="e.g., UK, London, Europe">?</span>
+                                    </label>
+                                    <input type="text" id="geographic_location" name="geographic_location" placeholder="e.g., UK">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Campaign Details -->
+                        <div class="subsection">
+                            <h3>Campaign Details</h3>
+                            
+                            <div class="form-group">
+                                <label for="entry_point">
+                                    Entry Point <span class="required">*</span>
+                                    <span class="tooltip" data-tip="How do leads enter this journey?">?</span>
+                                </label>
+                                <select id="entry_point" name="entry_point" required>
+                                    <option value="">-- Select entry point --</option>
+                                    <option value="Website form">Website form</option>
+                                    <option value="Meta lead form">Meta lead form</option>
+                                    <option value="QR code scan">QR code scan</option>
+                                    <option value="WhatsApp click-to-chat">WhatsApp click-to-chat</option>
+                                    <option value="Manual upload">Manual upload</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="campaign_offer">
+                                    Campaign Offer <span class="required">*</span>
+                                    <span class="tooltip" data-tip="Special offer, discount codes, incentives">?</span>
+                                </label>
+                                <textarea id="campaign_offer" name="campaign_offer" required placeholder="e.g., £50 Amazon.co.uk Gift Card with code Autumn25"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="offer_valid_until">
+                                    Offer Valid Until
+                                    <span class="tooltip" data-tip="Deadline date for the offer">?</span>
+                                </label>
+                                <input type="date" id="offer_valid_until" name="offer_valid_until">
+                            </div>
+                        </div>
+                        
+                        <!-- Product Features -->
+                        <div class="subsection">
+                            <h3>Product Features</h3>
+                            <p class="help-text">List key features of your product/service (at least 2 required)</p>
+                            
+                            <div class="form-group">
+                                <label for="feature_1">Key Feature 1 <span class="required">*</span></label>
+                                <input type="text" id="feature_1" name="feature_1" required placeholder="e.g., 25% government bonus on contributions">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feature_2">Key Feature 2 <span class="required">*</span></label>
+                                <input type="text" id="feature_2" name="feature_2" required placeholder="e.g., Save for first home or retirement">
+                            </div>
+                            
+                            <div id="additionalFeaturesList" class="dynamic-list"></div>
+                            <button type="button" class="btn-add" onclick="addFeatureField()">+ Add More Features</button>
+                        </div>
+                        
+                        <!-- Eligibility/Requirements -->
+                        <div class="subsection">
+                            <h3>Eligibility/Requirements</h3>
+                            <p class="help-text">Any requirements or eligibility criteria for the product</p>
+                            
+                            <div id="requirementsList" class="dynamic-list"></div>
+                            <button type="button" class="btn-add" onclick="addRequirementField()">+ Add Requirement</button>
+                        </div>
+                        
+                        <!-- Links & Assets -->
+                        <div class="subsection">
+                            <h3>Links & Assets</h3>
+                            
+                            <div class="form-group">
+                                <label for="main_product_url">
+                                    Main Product Page URL <span class="required">*</span>
+                                    <span class="tooltip" data-tip="Primary landing page for the product">?</span>
+                                </label>
+                                <input type="url" id="main_product_url" name="main_product_url" required placeholder="https://example.com/product">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="application_url">
+                                    Application/Purchase Form URL <span class="required">*</span>
+                                    <span class="tooltip" data-tip="Where users complete the conversion action">?</span>
+                                </label>
+                                <input type="url" id="application_url" name="application_url" required placeholder="https://example.com/apply">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Supporting Page URLs</label>
+                                <div id="supportingUrlsList" class="dynamic-list"></div>
+                                <button type="button" class="btn-add" onclick="addSupportingUrl()">+ Add Supporting URL</button>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>File References (names of assets you'll provide)</label>
+                                <div id="fileReferencesList" class="dynamic-list"></div>
+                                <button type="button" class="btn-add" onclick="addFileReference()">+ Add File Reference</button>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="assets_list">
+                                    List of Required Assets <span class="required">*</span>
+                                    <span class="tooltip" data-tip="List all images, videos, PDFs etc. needed for the journey">?</span>
+                                </label>
+                                <textarea id="assets_list" name="assets_list" required placeholder="e.g., Product hero image, Testimonial video, PDF guide, Logo"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 0.3 TIMELINE -->
-                <div class="form-section">
-                    <h2>0.3 JOURNEY TIMELINE PREFERENCES</h2>
-                    
-                    <div class="form-group">
-                        <label for="day0_duration">Day 0 duration</label>
-                        <input type="text" id="day0_duration" name="day0_duration" value="0-3 hours" required>
-                        <div class="help-text">Example: 0-3 hours, 0-2 hours, 0-4 hours</div>
+                <!-- SECTION 2: JOURNEY REQUIREMENTS -->
+                <div class="accordion-section" data-section="journey">
+                    <div class="accordion-header" onclick="toggleAccordion('journey')">
+                        <h2>2. JOURNEY REQUIREMENTS</h2>
+                        <span class="accordion-icon">▼</span>
                     </div>
-
-                    <div class="form-group">
-                        <label for="day0_step1_timing">Day 0 – Step 1 timing (Welcome)</label>
-                        <input type="text" id="day0_step1_timing" name="day0_step1_timing" value="Immediate" required>
-                        <div class="help-text">Example: Immediate</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="day0_step2_timing">Day 0 – Step 2 timing (Benefits/info)</label>
-                        <input type="text" id="day0_step2_timing" name="day0_step2_timing" value="+30 minutes" required>
-                        <div class="help-text">Example: +30 minutes, +1 hour</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="day0_step3_timing">Day 0 – Step 3 timing (Decision buttons)</label>
-                        <input type="text" id="day0_step3_timing" name="day0_step3_timing" value="+2 hours" required>
-                        <div class="help-text">Example: +2 hours, +90 minutes</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="day1_start">Day 1 start (from last Day 0 message)</label>
-                        <input type="text" id="day1_start" name="day1_start" value="+24 hours" required>
-                        <div class="help-text">Example: +24 hours, +12 hours, +48 hours</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="day2_start">Day 2 start (from last Day 1 message)</label>
-                        <input type="text" id="day2_start" name="day2_start" value="+24 hours" required>
-                        <div class="help-text">Example: +24 hours, +12 hours</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="day3_start">Day 3 start (from last Day 2 message)</label>
-                        <input type="text" id="day3_start" name="day3_start" value="+24 hours" required>
-                        <div class="help-text">Example: +24 hours, +12 hours</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="final_push_timing">Final push timing (after discount reveal)</label>
-                        <input type="text" id="final_push_timing" name="final_push_timing" value="+3 hours" required>
-                        <div class="help-text">Example: +3 hours, +2 hours</div>
+                    <div class="accordion-content">
+                        
+                        <!-- Structure -->
+                        <div class="subsection">
+                            <h3>Structure</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="journey_duration">
+                                        Journey Duration (days) <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Total number of days for the journey">?</span>
+                                    </label>
+                                    <input type="number" id="journey_duration" name="journey_duration" value="2" min="1" max="7" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="total_messages">
+                                        Total Messages (approx) <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Approximate number of messages in the journey">?</span>
+                                    </label>
+                                    <input type="number" id="total_messages" name="total_messages" value="7" min="3" max="20" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="include_personalization">
+                                        Include Personalization? <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Whether the journey has decision/branching points">?</span>
+                                    </label>
+                                    <select id="include_personalization" name="include_personalization" required onchange="togglePersonalizationFields()">
+                                        <option value="yes" selected>Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group" id="decisionPointsGroup">
+                                    <label for="decision_points">
+                                        Number of Decision Points
+                                        <span class="tooltip" data-tip="How many times users choose a path">?</span>
+                                    </label>
+                                    <input type="number" id="decision_points" name="decision_points" value="1" min="1" max="3">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Segmentation Paths -->
+                        <div class="subsection" id="segmentationSection">
+                            <h3>Segmentation Paths</h3>
+                            <p class="help-text">Define the personalization options for the decision point</p>
+                            
+                            <div class="form-group">
+                                <label for="segmentation_question">
+                                    Segmentation Question <span class="required">*</span>
+                                    <span class="tooltip" data-tip="What question are you asking to segment users?">?</span>
+                                </label>
+                                <input type="text" id="segmentation_question" name="segmentation_question" placeholder="e.g., What are you most interested in?">
+                            </div>
+                            
+                            <div class="form-row three-col">
+                                <div class="form-group">
+                                    <label for="option_1_label">Option 1 Label <span class="required">*</span></label>
+                                    <input type="text" id="option_1_label" name="option_1_label" placeholder="e.g., First Home">
+                                    <textarea id="option_1_desc" name="option_1_desc" class="small" placeholder="Description/messaging for this path"></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="option_2_label">Option 2 Label <span class="required">*</span></label>
+                                    <input type="text" id="option_2_label" name="option_2_label" placeholder="e.g., Retirement">
+                                    <textarea id="option_2_desc" name="option_2_desc" class="small" placeholder="Description/messaging for this path"></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="option_3_label">Option 3 Label</label>
+                                    <input type="text" id="option_3_label" name="option_3_label" placeholder="e.g., Both">
+                                    <textarea id="option_3_desc" name="option_3_desc" class="small" placeholder="Description/messaging for this path"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Timing Presets -->
+                        <div class="subsection">
+                            <h3>Timing Configuration</h3>
+                            
+                            <div class="timing-presets">
+                                <label>Quick Select Day 0 Timing:</label>
+                                <div class="preset-buttons">
+                                    <button type="button" class="btn-preset" onclick="applyTimingPreset('fast')">Fast Engagement</button>
+                                    <button type="button" class="btn-preset" onclick="applyTimingPreset('spaced')">Spaced Engagement</button>
+                                </div>
+                            </div>
+                            
+                            <h4>Day 0 Timing</h4>
+                            <div class="form-row three-col">
+                                <div class="form-group">
+                                    <label for="day0_timing_strategy">
+                                        Day 0 Strategy <span class="required">*</span>
+                                    </label>
+                                    <select id="day0_timing_strategy" name="day0_timing_strategy" required>
+                                        <option value="fast" selected>Fast (seconds)</option>
+                                        <option value="spaced">Spaced (minutes/hours)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="step1_to_2_delay">
+                                        Step 1→2 Delay <span class="required">*</span>
+                                    </label>
+                                    <input type="text" id="step1_to_2_delay" name="step1_to_2_delay" value="10 seconds" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="step2_to_3_delay">
+                                        Step 2→3 Delay <span class="required">*</span>
+                                    </label>
+                                    <input type="text" id="step2_to_3_delay" name="step2_to_3_delay" value="5 seconds" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="step3_to_autoreplies">
+                                    Step 3→Auto-replies <span class="required">*</span>
+                                </label>
+                                <input type="text" id="step3_to_autoreplies" name="step3_to_autoreplies" value="Immediate" required>
+                            </div>
+                            
+                            <div class="timing-presets">
+                                <label>Quick Select Day 1+ Timing:</label>
+                                <div class="preset-buttons">
+                                    <button type="button" class="btn-preset" onclick="applyDay1Preset('quick')">Quick Close</button>
+                                    <button type="button" class="btn-preset" onclick="applyDay1Preset('medium')">Medium Pace</button>
+                                    <button type="button" class="btn-preset" onclick="applyDay1Preset('slow')">Slow Burn</button>
+                                </div>
+                            </div>
+                            
+                            <h4>Day 1+ Timing</h4>
+                            <div class="form-row three-col">
+                                <div class="form-group">
+                                    <label for="day1_start">
+                                        Time until Day 1 starts <span class="required">*</span>
+                                    </label>
+                                    <input type="text" id="day1_start" name="day1_start" value="24 hours" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="step5_to_6_delay">
+                                        Step 5→6 Delay <span class="required">*</span>
+                                    </label>
+                                    <input type="text" id="step5_to_6_delay" name="step5_to_6_delay" value="2 hours" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="step6_to_7_delay">
+                                        Step 6→7 Delay <span class="required">*</span>
+                                    </label>
+                                    <input type="text" id="step6_to_7_delay" name="step6_to_7_delay" value="10 minutes" required>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 0.4 JOURNEY STRUCTURE -->
-                <div class="form-section">
-                    <h2>0.4 JOURNEY STRUCTURE (GLOBAL RULES)</h2>
-                    
-                    <div class="form-group">
-                        <label for="urgency_level">Urgency level</label>
-                        <select id="urgency_level" name="urgency_level" required>
-                            <option value="subtle">Subtle</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="strong">Strong</option>
-                        </select>
-                        <div class="help-text">Example: subtle / medium / strong</div>
+                <!-- SECTION 3: BRAND GUIDELINES -->
+                <div class="accordion-section" data-section="brand">
+                    <div class="accordion-header" onclick="toggleAccordion('brand')">
+                        <h2>3. BRAND GUIDELINES</h2>
+                        <span class="accordion-icon">▼</span>
                     </div>
-
-                    <div class="form-group">
-                        <label for="journey_exceptions">Journey exceptions (optional)</label>
-                        <textarea id="journey_exceptions" name="journey_exceptions" placeholder="If you want exceptions (e.g. different durations per journey), specify here"></textarea>
+                    <div class="accordion-content">
+                        
+                        <!-- Voice & Tone -->
+                        <div class="subsection">
+                            <h3>Voice & Tone</h3>
+                            
+                            <div class="form-group">
+                                <label for="tone_of_voice">
+                                    Tone of Voice <span class="required">*</span>
+                                    <span class="tooltip" data-tip="Select all that apply to your brand voice">?</span>
+                                </label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label"><input type="checkbox" name="tone_of_voice[]" value="Professional"> Professional</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="tone_of_voice[]" value="Friendly"> Friendly</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="tone_of_voice[]" value="Casual"> Casual</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="tone_of_voice[]" value="Trustworthy" checked> Trustworthy</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="tone_of_voice[]" value="Urgent"> Urgent</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="tone_of_voice[]" value="Warm"> Warm</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="brand_positioning">
+                                    Brand Positioning <span class="required">*</span>
+                                    <span class="tooltip" data-tip="Key messages about your company and what you stand for">?</span>
+                                </label>
+                                <textarea id="brand_positioning" name="brand_positioning" required placeholder="e.g., We're a trusted financial services provider dedicated to helping police officers secure their financial future"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="use_emojis">
+                                        Use Emojis? <span class="required">*</span>
+                                    </label>
+                                    <select id="use_emojis" name="use_emojis" required onchange="toggleEmojiStyle()">
+                                        <option value="no" selected>No</option>
+                                        <option value="yes">Yes</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group" id="emojiStyleGroup" style="display: none;">
+                                    <label for="emoji_style">
+                                        Emoji Style
+                                        <span class="tooltip" data-tip="How emojis should be used">?</span>
+                                    </label>
+                                    <input type="text" id="emoji_style" name="emoji_style" placeholder="e.g., Minimal, professional">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Visual Identity -->
+                        <div class="subsection">
+                            <h3>Visual Identity</h3>
+                            
+                            <div class="form-group">
+                                <label for="colors_from_url">
+                                    Extract Colors from URL
+                                    <span class="tooltip" data-tip="Enter a URL to scan for brand colors">?</span>
+                                </label>
+                                <div class="input-with-button">
+                                    <input type="url" id="colors_from_url" name="colors_from_url" placeholder="https://example.com">
+                                    <button type="button" class="btn-scan" onclick="scanUrlForColors()">Scan</button>
+                                </div>
+                                <div id="colorScanResult" class="color-scan-result"></div>
+                            </div>
+                            
+                            <div class="form-row three-col">
+                                <div class="form-group">
+                                    <label for="primary_color">
+                                        Primary Color <span class="required">*</span>
+                                        <span class="tooltip" data-tip="HEX code e.g., #315891">?</span>
+                                    </label>
+                                    <input type="text" id="primary_color" name="primary_color" required placeholder="#315891" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
+                                    <div class="color-preview" id="primary_preview"></div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="accent_color">
+                                        Accent Color <span class="required">*</span>
+                                        <span class="tooltip" data-tip="HEX code for accent/CTA color">?</span>
+                                    </label>
+                                    <input type="text" id="accent_color" name="accent_color" required placeholder="#D44437" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
+                                    <div class="color-preview" id="accent_preview"></div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="background_color">
+                                        Background Color <span class="required">*</span>
+                                        <span class="tooltip" data-tip="HEX code for background">?</span>
+                                    </label>
+                                    <input type="text" id="background_color" name="background_color" required placeholder="#E9E9E9" pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$">
+                                    <div class="color-preview" id="background_preview"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="logo_reference">
+                                    Logo File Reference
+                                    <span class="tooltip" data-tip="Name of logo file for HTML footer">?</span>
+                                </label>
+                                <input type="text" id="logo_reference" name="logo_reference" placeholder="e.g., company-logo.png">
+                            </div>
+                        </div>
+                        
+                        <!-- Key Phrases -->
+                        <div class="subsection">
+                            <h3>Key Brand Phrases</h3>
+                            <p class="help-text">Phrases that should be included in messaging</p>
+                            
+                            <div id="brandPhrasesList" class="dynamic-list"></div>
+                            <button type="button" class="btn-add" onclick="addBrandPhrase()">+ Add Brand Phrase</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 0.7 BRAND VOICE -->
-                <div class="form-section">
-                    <h2>0.7 BRAND VOICE SETTINGS</h2>
-                    
-                    <div class="form-group">
-                        <label for="sophistication_level">Sophistication level (1-10)</label>
-                        <input type="number" id="sophistication_level" name="sophistication_level" min="1" max="10" value="7" required>
-                        <div class="help-text">Example: 3 = very casual, 10 = very formal</div>
+                <!-- SECTION 4: PLATFORM CONSTRAINTS -->
+                <div class="accordion-section" data-section="platform">
+                    <div class="accordion-header" onclick="toggleAccordion('platform')">
+                        <h2>4. PLATFORM CONSTRAINTS</h2>
+                        <span class="accordion-icon">▼</span>
                     </div>
-
-                    <div class="form-group">
-                        <label for="tone">Tone</label>
-                        <input type="text" id="tone" name="tone" value="professional" required>
-                        <div class="help-text">Example: warm / professional / clinical / friendly / playful / etc.</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emoji_usage">Emoji usage</label>
-                        <select id="emoji_usage" name="emoji_usage" required>
-                            <option value="minimal" selected>Minimal</option>
-                            <option value="strategic">Strategic</option>
-                            <option value="frequent">Frequent</option>
-                        </select>
-                        <div class="help-text">Example: minimal / strategic / frequent</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Key brand attributes (keywords)</label>
-                        <div id="brandAttributesList" class="dynamic-list"></div>
-                        <button type="button" class="btn-add" onclick="addListItem('brandAttributesList', 'brand_attributes')">+ Add Attribute</button>
-                        <div class="help-text">Example: trustworthy, expert, supportive, no-nonsense</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="language_to_avoid">Language to avoid</label>
-                        <textarea id="language_to_avoid" name="language_to_avoid" placeholder="no slang, avoid hypey claims, no guarantees"></textarea>
-                        <div class="help-text">Example: "no slang", "avoid hypey claims", "no guarantees"</div>
+                    <div class="accordion-content">
+                        
+                        <div class="subsection">
+                            <h3>Platform</h3>
+                            
+                            <div class="form-group">
+                                <label for="platform">
+                                    Platform <span class="required">*</span>
+                                </label>
+                                <select id="platform" name="platform" required onchange="updateCharacterLimits()">
+                                    <option value="WATI" selected>WATI</option>
+                                    <option value="Twilio">Twilio</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="subsection">
+                            <h3>Character Limits</h3>
+                            <p class="help-text">Pre-filled defaults for WATI. Adjust if using a different platform.</p>
+                            
+                            <div class="form-row three-col">
+                                <div class="form-group">
+                                    <label for="body_text_max">Body Text Max <span class="required">*</span></label>
+                                    <input type="number" id="body_text_max" name="body_text_max" value="200" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="header_max">Header Max <span class="required">*</span></label>
+                                    <input type="number" id="header_max" name="header_max" value="60" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="footer_max">Footer Max <span class="required">*</span></label>
+                                    <input type="number" id="footer_max" name="footer_max" value="60" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="interactive_button_max">Interactive Button Max <span class="required">*</span></label>
+                                    <input type="number" id="interactive_button_max" name="interactive_button_max" value="20" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="quick_reply_button_max">Quick Reply Button Max <span class="required">*</span></label>
+                                    <input type="number" id="quick_reply_button_max" name="quick_reply_button_max" value="25" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="subsection info-box">
+                            <h3>Message Type Rules (Reference)</h3>
+                            <ul>
+                                <li><strong>First message:</strong> BROADCAST/TEMPLATE (required)</li>
+                                <li><strong>Within 24 hours:</strong> CONVERSATIONAL</li>
+                                <li><strong>After 24+ hours:</strong> BROADCAST/TEMPLATE</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary">
-                    <span class="btn-text">Generate Prompt File</span>
-                </button>
+                <!-- SECTION 5: CONVERSION TARGETS -->
+                <div class="accordion-section" data-section="targets">
+                    <div class="accordion-header" onclick="toggleAccordion('targets')">
+                        <h2>5. CONVERSION TARGETS</h2>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        
+                        <div class="subsection">
+                            <div class="form-row two-col">
+                                <div class="form-group">
+                                    <label for="target_open_rate">
+                                        Target Open Rate <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Expected percentage of messages opened">?</span>
+                                    </label>
+                                    <div class="input-with-suffix">
+                                        <input type="number" id="target_open_rate" name="target_open_rate" value="70" min="0" max="100" required onchange="calculateEndToEnd()">
+                                        <span class="suffix">%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="target_button_click">
+                                        Target Button Click Rate <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Expected percentage of button clicks">?</span>
+                                    </label>
+                                    <div class="input-with-suffix">
+                                        <input type="number" id="target_button_click" name="target_button_click" value="40" min="0" max="100" required onchange="calculateEndToEnd()">
+                                        <span class="suffix">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row two-col">
+                                <div class="form-group">
+                                    <label for="target_app_start">
+                                        Target Application/Purchase Start <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Expected percentage starting the conversion action">?</span>
+                                    </label>
+                                    <div class="input-with-suffix">
+                                        <input type="number" id="target_app_start" name="target_app_start" value="40" min="0" max="100" required onchange="calculateEndToEnd()">
+                                        <span class="suffix">%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="target_completion">
+                                        Target Completion Rate <span class="required">*</span>
+                                        <span class="tooltip" data-tip="Expected percentage completing the conversion">?</span>
+                                    </label>
+                                    <div class="input-with-suffix">
+                                        <input type="number" id="target_completion" name="target_completion" value="20" min="0" max="100" required onchange="calculateEndToEnd()">
+                                        <span class="suffix">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group calculated-field">
+                                <label>Target End-to-End Conversion</label>
+                                <div class="calculated-value" id="end_to_end_conversion">~2.2%</div>
+                                <p class="help-text">Auto-calculated from above values</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 6: COMPLIANCE & SPECIAL REQUIREMENTS -->
+                <div class="accordion-section" data-section="compliance">
+                    <div class="accordion-header" onclick="toggleAccordion('compliance')">
+                        <h2>6. COMPLIANCE & SPECIAL REQUIREMENTS</h2>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        
+                        <!-- Must Include -->
+                        <div class="subsection">
+                            <h3>Must Include</h3>
+                            
+                            <div class="form-group locked">
+                                <label>
+                                    <input type="checkbox" checked disabled>
+                                    Opt-out text in first message (locked)
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="optout_wording">
+                                    Opt-out Wording <span class="required">*</span>
+                                </label>
+                                <input type="text" id="optout_wording" name="optout_wording" value="Type STOP to opt-out" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="include_disclaimers">
+                                        Include Compliance Disclaimers? <span class="required">*</span>
+                                    </label>
+                                    <select id="include_disclaimers" name="include_disclaimers" required onchange="toggleDisclaimerText()">
+                                        <option value="yes" selected>Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="include_terms">
+                                        Include "Terms and conditions apply"? <span class="required">*</span>
+                                    </label>
+                                    <select id="include_terms" name="include_terms" required>
+                                        <option value="yes" selected>Yes</option>
+                                        <option value="no">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" id="disclaimerTextGroup">
+                                <label for="disclaimer_text">
+                                    Disclaimer Text
+                                    <span class="tooltip" data-tip="Specific compliance disclaimers to include">?</span>
+                                </label>
+                                <textarea id="disclaimer_text" name="disclaimer_text" placeholder="e.g., Capital at risk. Tax rules may change."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="other_required">
+                                    Other Required Content
+                                </label>
+                                <textarea id="other_required" name="other_required" placeholder="Any other content that must be included"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Must Avoid -->
+                        <div class="subsection">
+                            <h3>Must Avoid</h3>
+                            
+                            <div class="form-group">
+                                <label for="content_to_avoid">
+                                    Content to Avoid
+                                    <span class="tooltip" data-tip="Topics, words, or claims to avoid">?</span>
+                                </label>
+                                <textarea id="content_to_avoid" name="content_to_avoid" placeholder="e.g., No guarantees of returns, no time-pressure tactics"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="competitor_mentions">
+                                    Competitor Mentions to Avoid
+                                </label>
+                                <input type="text" id="competitor_mentions" name="competitor_mentions" placeholder="e.g., Company X, Brand Y">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="regulatory_restrictions">
+                                    Regulatory Restrictions
+                                    <span class="tooltip" data-tip="Industry-specific regulatory requirements">?</span>
+                                </label>
+                                <textarea id="regulatory_restrictions" name="regulatory_restrictions" placeholder="e.g., FCA regulations, GDPR requirements, advertising standards"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: OUTPUTS/DELIVERABLES -->
+                <div class="accordion-section" data-section="outputs">
+                    <div class="accordion-header" onclick="toggleAccordion('outputs')">
+                        <h2>7. OUTPUTS/DELIVERABLES</h2>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        
+                        <div class="subsection">
+                            <h3>Documents Required</h3>
+                            
+                            <div class="checkbox-group vertical">
+                                <label class="checkbox-label locked">
+                                    <input type="checkbox" name="deliverables[]" value="markdown" checked disabled>
+                                    Journey Documentation (Markdown) - Required
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverables[]" value="full_detail" checked>
+                                    HTML - Full Detailed View
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverables[]" value="workflow_overview" checked>
+                                    HTML - Workflow Overview
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverables[]" value="master_summary" checked>
+                                    Master Summary
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverables[]" value="funnel_analysis">
+                                    Conversion Funnel Analysis
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="subsection">
+                            <h3>Format Preferences</h3>
+                            
+                            <div class="checkbox-group vertical">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="format_prefs[]" value="include_logo" checked>
+                                    Include logo in HTML files
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="format_prefs[]" value="remove_node_ids" checked>
+                                    Remove technical Node IDs
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="format_prefs[]" value="show_char_counts" checked>
+                                    Show character counts
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="format_prefs[]" value="show_cumulative_timing" checked>
+                                    Show cumulative timing
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 8: ADDITIONAL CONTEXT -->
+                <div class="accordion-section" data-section="additional">
+                    <div class="accordion-header" onclick="toggleAccordion('additional')">
+                        <h2>8. ADDITIONAL CONTEXT</h2>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        
+                        <div class="subsection">
+                            <div class="form-group">
+                                <label for="additional_notes">
+                                    Additional Notes
+                                    <span class="tooltip" data-tip="Any other relevant information not covered above">?</span>
+                                </label>
+                                <textarea id="additional_notes" name="additional_notes" class="large" placeholder="Any other relevant information, special requirements, or context..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-section">
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        <span class="btn-text">Generate Prompt File</span>
+                    </button>
+                    <p id="validationError" class="validation-error"></p>
+                </div>
 
                 <div id="errorMessage" class="error-message" style="display: none;"></div>
                 <div id="successMessage" class="success-message" style="display: none;"></div>
@@ -308,68 +840,365 @@
     </div>
 
     <script>
-        let listCounters = {
-            uniqueSellingPointsList: 0,
-            productPagesList: 0,
-            offerPagesList: 0,
-            productsList: 0,
-            testimonialsList: 0,
-            brandAttributesList: 0
-        };
-
-        function addListItem(containerId, fieldName) {
-            const container = document.getElementById(containerId);
-            const counter = listCounters[containerId] || 0;
-            const newId = `${fieldName}_${counter}`;
+        // ==========================================
+        // Accordion functionality
+        // ==========================================
+        function toggleAccordion(section) {
+            const sectionEl = document.querySelector(`[data-section="${section}"]`);
+            const content = sectionEl.querySelector('.accordion-content');
+            const icon = sectionEl.querySelector('.accordion-icon');
             
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.id = `item_${newId}`;
-            item.innerHTML = `
-                <input type="text" name="${fieldName}[]" placeholder="Enter ${fieldName.replace(/_/g, ' ')}" required>
-                <button type="button" class="btn-remove" onclick="removeListItem('item_${newId}')">Remove</button>
-            `;
-            
-            container.appendChild(item);
-            listCounters[containerId] = counter + 1;
+            content.classList.toggle('open');
+            icon.classList.toggle('rotated');
         }
 
-        function removeListItem(itemId) {
-            const item = document.getElementById(itemId);
-            if (item) {
-                item.remove();
+        // ==========================================
+        // Dynamic field counters
+        // ==========================================
+        let featureCounter = 3;
+        let requirementCounter = 0;
+        let supportingUrlCounter = 0;
+        let fileRefCounter = 0;
+        let brandPhraseCounter = 0;
+
+        function addFeatureField() {
+            const container = document.getElementById('additionalFeaturesList');
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.id = `feature_item_${featureCounter}`;
+            div.innerHTML = `
+                <input type="text" name="feature_${featureCounter}" placeholder="Additional feature">
+                <button type="button" class="btn-remove" onclick="removeField('feature_item_${featureCounter}')">Remove</button>
+            `;
+            container.appendChild(div);
+            featureCounter++;
+            updateChecklist();
+        }
+
+        function addRequirementField() {
+            const container = document.getElementById('requirementsList');
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.id = `req_item_${requirementCounter}`;
+            div.innerHTML = `
+                <input type="text" name="requirements[]" placeholder="e.g., Ages 18-39 at opening">
+                <button type="button" class="btn-remove" onclick="removeField('req_item_${requirementCounter}')">Remove</button>
+            `;
+            container.appendChild(div);
+            requirementCounter++;
+        }
+
+        function addSupportingUrl() {
+            const container = document.getElementById('supportingUrlsList');
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.id = `url_item_${supportingUrlCounter}`;
+            div.innerHTML = `
+                <input type="url" name="supporting_urls[]" placeholder="https://example.com/page">
+                <button type="button" class="btn-remove" onclick="removeField('url_item_${supportingUrlCounter}')">Remove</button>
+            `;
+            container.appendChild(div);
+            supportingUrlCounter++;
+        }
+
+        function addFileReference() {
+            const container = document.getElementById('fileReferencesList');
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.id = `file_item_${fileRefCounter}`;
+            div.innerHTML = `
+                <input type="text" name="file_references[]" placeholder="e.g., product-guide.pdf">
+                <button type="button" class="btn-remove" onclick="removeField('file_item_${fileRefCounter}')">Remove</button>
+            `;
+            container.appendChild(div);
+            fileRefCounter++;
+        }
+
+        function addBrandPhrase() {
+            const container = document.getElementById('brandPhrasesList');
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.id = `phrase_item_${brandPhraseCounter}`;
+            div.innerHTML = `
+                <input type="text" name="brand_phrases[]" placeholder="e.g., Your future, secured">
+                <button type="button" class="btn-remove" onclick="removeField('phrase_item_${brandPhraseCounter}')">Remove</button>
+            `;
+            container.appendChild(div);
+            brandPhraseCounter++;
+        }
+
+        function removeField(id) {
+            document.getElementById(id).remove();
+            updateChecklist();
+        }
+
+        // ==========================================
+        // Conditional field visibility
+        // ==========================================
+        function togglePersonalizationFields() {
+            const isPersonalized = document.getElementById('include_personalization').value === 'yes';
+            document.getElementById('decisionPointsGroup').style.display = isPersonalized ? 'block' : 'none';
+            document.getElementById('segmentationSection').style.display = isPersonalized ? 'block' : 'none';
+            
+            // Update required attributes
+            const segFields = ['segmentation_question', 'option_1_label', 'option_2_label'];
+            segFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.required = isPersonalized;
+            });
+        }
+
+        function toggleEmojiStyle() {
+            const useEmojis = document.getElementById('use_emojis').value === 'yes';
+            document.getElementById('emojiStyleGroup').style.display = useEmojis ? 'block' : 'none';
+        }
+
+        function toggleDisclaimerText() {
+            const includeDisclaimers = document.getElementById('include_disclaimers').value === 'yes';
+            document.getElementById('disclaimerTextGroup').style.display = includeDisclaimers ? 'block' : 'none';
+        }
+
+        // ==========================================
+        // Timing presets
+        // ==========================================
+        function applyTimingPreset(preset) {
+            if (preset === 'fast') {
+                document.getElementById('day0_timing_strategy').value = 'fast';
+                document.getElementById('step1_to_2_delay').value = '10 seconds';
+                document.getElementById('step2_to_3_delay').value = '5 seconds';
+                document.getElementById('step3_to_autoreplies').value = 'Immediate';
+            } else if (preset === 'spaced') {
+                document.getElementById('day0_timing_strategy').value = 'spaced';
+                document.getElementById('step1_to_2_delay').value = '30 minutes';
+                document.getElementById('step2_to_3_delay').value = '1 hour';
+                document.getElementById('step3_to_autoreplies').value = 'Immediate';
             }
         }
 
-        // Build deliverables string
-        function buildDeliverablesString() {
-            const checkboxes = document.querySelectorAll('input[name="deliverables[]"]:checked');
-            const values = Array.from(checkboxes).map(cb => cb.value);
-            const numJourneys = document.getElementById('num_journeys').value;
-            return `Journeys: ${numJourneys}. Deliverables: ${values.join(', ')}`;
+        function applyDay1Preset(preset) {
+            if (preset === 'quick') {
+                document.getElementById('step5_to_6_delay').value = '2 hours';
+                document.getElementById('step6_to_7_delay').value = '10 minutes';
+            } else if (preset === 'medium') {
+                document.getElementById('step5_to_6_delay').value = '4 hours';
+                document.getElementById('step6_to_7_delay').value = '1 hour';
+            } else if (preset === 'slow') {
+                document.getElementById('step5_to_6_delay').value = '6 hours';
+                document.getElementById('step6_to_7_delay').value = '2 hours';
+            }
         }
 
+        // ==========================================
+        // Platform character limits
+        // ==========================================
+        function updateCharacterLimits() {
+            const platform = document.getElementById('platform').value;
+            if (platform === 'WATI') {
+                document.getElementById('body_text_max').value = 200;
+                document.getElementById('header_max').value = 60;
+                document.getElementById('footer_max').value = 60;
+                document.getElementById('interactive_button_max').value = 20;
+                document.getElementById('quick_reply_button_max').value = 25;
+            }
+            // Add other platform defaults as needed
+        }
+
+        // ==========================================
+        // Conversion target calculation
+        // ==========================================
+        function calculateEndToEnd() {
+            const openRate = parseFloat(document.getElementById('target_open_rate').value) || 0;
+            const clickRate = parseFloat(document.getElementById('target_button_click').value) || 0;
+            const startRate = parseFloat(document.getElementById('target_app_start').value) || 0;
+            const completionRate = parseFloat(document.getElementById('target_completion').value) || 0;
+            
+            const endToEnd = (openRate / 100) * (clickRate / 100) * (startRate / 100) * (completionRate / 100) * 100;
+            document.getElementById('end_to_end_conversion').textContent = `~${endToEnd.toFixed(2)}%`;
+        }
+
+        // ==========================================
+        // Color preview
+        // ==========================================
+        function updateColorPreviews() {
+            const colors = ['primary', 'accent', 'background'];
+            colors.forEach(color => {
+                const input = document.getElementById(`${color}_color`);
+                const preview = document.getElementById(`${color}_preview`);
+                if (input && preview) {
+                    const value = input.value;
+                    if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value)) {
+                        preview.style.backgroundColor = value;
+                        preview.style.display = 'block';
+                    } else {
+                        preview.style.display = 'none';
+                    }
+                }
+            });
+            updateChecklist();
+        }
+
+        // Add listeners to color inputs
+        document.querySelectorAll('#primary_color, #accent_color, #background_color').forEach(input => {
+            input.addEventListener('input', updateColorPreviews);
+        });
+
+        // ==========================================
+        // Color scanning from URL
+        // ==========================================
+        async function scanUrlForColors() {
+            const url = document.getElementById('colors_from_url').value;
+            const resultDiv = document.getElementById('colorScanResult');
+            
+            if (!url) {
+                resultDiv.innerHTML = '<span class="error">Please enter a URL</span>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<span class="loading">Scanning...</span>';
+            
+            try {
+                const response = await fetch('/api/extract-colors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.colors && data.colors.length > 0) {
+                        resultDiv.innerHTML = '<span class="success">Colors found:</span>';
+                        const colorList = document.createElement('div');
+                        colorList.className = 'extracted-colors';
+                        data.colors.forEach((color, index) => {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'color-swatch';
+                            btn.style.backgroundColor = color;
+                            btn.title = color;
+                            btn.onclick = () => applyExtractedColor(color, index);
+                            colorList.appendChild(btn);
+                        });
+                        resultDiv.appendChild(colorList);
+                    } else {
+                        resultDiv.innerHTML = '<span class="warning">No colors detected. Enter manually.</span>';
+                    }
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<span class="error">${error.error || 'Failed to scan URL'}</span>`;
+                }
+            } catch (e) {
+                resultDiv.innerHTML = `<span class="error">Error: ${e.message}</span>`;
+            }
+        }
+
+        function applyExtractedColor(color, index) {
+            const fields = ['primary_color', 'accent_color', 'background_color'];
+            if (index < fields.length) {
+                document.getElementById(fields[index]).value = color;
+                updateColorPreviews();
+            }
+        }
+
+        // ==========================================
+        // Validation checklist
+        // ==========================================
+        function updateChecklist() {
+            const checks = {
+                'product_name': !!document.getElementById('product_name').value.trim(),
+                'company_name': !!document.getElementById('company_name').value.trim(),
+                'audience': !!document.getElementById('audience_description').value.trim(),
+                'features': !!(document.getElementById('feature_1').value.trim() && document.getElementById('feature_2').value.trim()),
+                'main_url': !!document.getElementById('main_product_url').value.trim(),
+                'form_url': !!document.getElementById('application_url').value.trim(),
+                'timing': !!(document.getElementById('step1_to_2_delay').value.trim() && document.getElementById('day1_start').value.trim()),
+                'colors': !!(document.getElementById('primary_color').value.trim() && document.getElementById('accent_color').value.trim()),
+                'targets': !!document.getElementById('target_open_rate').value
+            };
+            
+            let allValid = true;
+            Object.entries(checks).forEach(([key, valid]) => {
+                const item = document.querySelector(`[data-check="${key}"]`);
+                if (item) {
+                    item.classList.toggle('checked', valid);
+                    if (!valid) allValid = false;
+                }
+            });
+            
+            return allValid;
+        }
+
+        // Listen for input changes to update checklist
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            el.addEventListener('input', updateChecklist);
+            el.addEventListener('change', updateChecklist);
+        });
+
+        // ==========================================
+        // Character count for textareas
+        // ==========================================
+        function addCharacterCounters() {
+            document.querySelectorAll('textarea[maxlength]').forEach(textarea => {
+                const max = textarea.getAttribute('maxlength');
+                const counter = document.createElement('div');
+                counter.className = 'char-counter';
+                counter.textContent = `0/${max}`;
+                textarea.parentNode.appendChild(counter);
+                
+                textarea.addEventListener('input', () => {
+                    const len = textarea.value.length;
+                    counter.textContent = `${len}/${max}`;
+                    counter.classList.toggle('warning', len > max * 0.8);
+                    counter.classList.toggle('error', len >= max);
+                });
+            });
+        }
+
+        // ==========================================
         // Form submission
+        // ==========================================
         document.getElementById('promptBuilderForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // Check if all required fields are valid
             const form = e.target;
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Check checklist
+            if (!updateChecklist()) {
+                document.getElementById('validationError').textContent = 'Please complete all required fields highlighted in the checklist.';
+                document.getElementById('validationError').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('validationError').style.display = 'none';
+            
             const formData = new FormData(form);
             
-            // Build deliverables string
-            const deliverables = buildDeliverablesString();
-            formData.set('deliverables', deliverables);
-            
-            // Remove individual deliverable checkboxes from form data
-            formData.delete('deliverables[]');
+            // Collect dynamic feature fields
+            const features = [];
+            features.push(document.getElementById('feature_1').value);
+            features.push(document.getElementById('feature_2').value);
+            for (let i = 3; i < featureCounter; i++) {
+                const field = document.querySelector(`[name="feature_${i}"]`);
+                if (field && field.value.trim()) {
+                    features.push(field.value);
+                }
+            }
+            formData.set('features', JSON.stringify(features));
             
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
             const nextStepButton = document.getElementById('nextStepButton');
+            const submitBtn = document.getElementById('submitBtn');
             
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
             nextStepButton.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.btn-text').textContent = 'Generating...';
             
             try {
                 const response = await fetch('/api/generate-prompt', {
@@ -378,7 +1207,6 @@
                 });
                 
                 if (response.ok) {
-                    // Download the file
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -391,9 +1219,7 @@
                     
                     successMessage.textContent = 'Prompt file generated successfully! Download started.';
                     successMessage.style.display = 'block';
-                    
-                    // Show the "On to Journey Generator" button
-                    document.getElementById('nextStepButton').style.display = 'block';
+                    nextStepButton.style.display = 'block';
                 } else {
                     const error = await response.json();
                     errorMessage.textContent = error.error || 'An error occurred';
@@ -402,9 +1228,36 @@
             } catch (error) {
                 errorMessage.textContent = `Error: ${error.message}`;
                 errorMessage.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.btn-text').textContent = 'Generate Prompt File';
             }
+        });
+
+        // ==========================================
+        // Initialize
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize conditional fields
+            togglePersonalizationFields();
+            toggleEmojiStyle();
+            toggleDisclaimerText();
+            
+            // Initialize checklist
+            updateChecklist();
+            
+            // Initialize character counters
+            addCharacterCounters();
+            
+            // Initialize color previews
+            updateColorPreviews();
+            
+            // Calculate initial end-to-end conversion
+            calculateEndToEnd();
+            
+            // Open first accordion by default
+            document.querySelector('.accordion-content').classList.add('open');
         });
     </script>
 </body>
 </html>
-

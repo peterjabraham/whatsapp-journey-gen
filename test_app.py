@@ -144,34 +144,49 @@ class TestFlaskApp(unittest.TestCase):
     def test_generate_prompt_route(self):
         """Test prompt generation endpoint."""
         data = {
+            'product_name': 'Test Product',
+            'company_name': 'Test Company',
+            'audience_description': 'Test audience description',
+            'entry_point': 'Website form',
+            'campaign_offer': 'Test offer',
+            'feature_1': 'Feature One',
+            'feature_2': 'Feature Two',
+            'main_product_url': 'https://example.com/product',
+            'application_url': 'https://example.com/apply',
+            'assets_list': 'Hero image, Logo',
+            'journey_duration': '2',
+            'total_messages': '7',
+            'include_personalization': 'yes',
+            'step1_to_2_delay': '10 seconds',
+            'step2_to_3_delay': '5 seconds',
+            'step3_to_autoreplies': 'Immediate',
+            'day1_start': '24 hours',
+            'step5_to_6_delay': '2 hours',
+            'step6_to_7_delay': '10 minutes',
+            'brand_positioning': 'We are the best',
+            'primary_color': '#315891',
+            'accent_color': '#D44437',
+            'background_color': '#E9E9E9',
             'platform': 'WATI',
-            'format': 'B2C',
-            'duration_overall': '3 days',
-            'brand_name': 'Test Brand',
-            'industry': 'Test Industry',
-            'audience': 'Test Audience',
-            'offer_text': 'Test Offer',
-            'quote_code': 'TEST123',
-            'num_journeys': '1',
-            'deliverables': 'Journeys: 1. Deliverables: 1',
-            'day0_duration': '0-3 hours',
-            'day0_step1_timing': 'Immediate',
-            'day0_step2_timing': '+30 minutes',
-            'day0_step3_timing': '+2 hours',
-            'day1_start': '+24 hours',
-            'day2_start': '+24 hours',
-            'day3_start': '+24 hours',
-            'final_push_timing': '+3 hours',
-            'urgency_level': 'medium',
-            'sophistication_level': '7',
-            'tone': 'professional',
-            'emoji_usage': 'minimal'
+            'body_text_max': '200',
+            'header_max': '60',
+            'footer_max': '60',
+            'interactive_button_max': '20',
+            'quick_reply_button_max': '25',
+            'target_open_rate': '70',
+            'target_button_click': '40',
+            'target_app_start': '40',
+            'target_completion': '20',
+            'optout_wording': 'Type STOP to opt-out',
+            'include_disclaimers': 'yes',
+            'include_terms': 'yes',
         }
         response = self.app.post('/api/generate-prompt', data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, 'text/markdown')
         self.assertIn(b'PROMPT: WhatsApp Journey Generator', response.data)
-        self.assertIn(b'Test Brand', response.data)
+        self.assertIn(b'Test Product', response.data)
+        self.assertIn(b'Test Company', response.data)
 
     def test_get_models_route(self):
         """Test models API endpoint."""
@@ -328,6 +343,53 @@ class TestFlaskApp(unittest.TestCase):
         }
         response = self.app.post('/api/generate', data=data, content_type='multipart/form-data')
         self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertIn('error', data)
+
+    def test_extract_colors_no_url(self):
+        """Test color extraction without URL."""
+        response = self.app.post('/api/extract-colors', 
+                                  data=json.dumps({}),
+                                  content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertIn('error', data)
+
+    @patch('requests.get')
+    def test_extract_colors_success(self, mock_get):
+        """Test successful color extraction from URL."""
+        # Mock the HTTP response with some HTML containing colors
+        mock_response = MagicMock()
+        mock_response.text = '''
+        <html>
+        <style>
+            .header { background-color: #315891; }
+            .accent { color: #D44437; }
+            .cta { background: rgb(16, 185, 129); }
+        </style>
+        </html>
+        '''
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+        
+        response = self.app.post('/api/extract-colors',
+                                  data=json.dumps({'url': 'https://example.com'}),
+                                  content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertIn('colors', data)
+        self.assertIsInstance(data['colors'], list)
+
+    @patch('requests.get')
+    def test_extract_colors_url_error(self, mock_get):
+        """Test color extraction with URL fetch error."""
+        import requests as http_requests
+        mock_get.side_effect = http_requests.RequestException("Connection failed")
+        
+        response = self.app.post('/api/extract-colors',
+                                  data=json.dumps({'url': 'https://invalid-url.com'}),
+                                  content_type='application/json')
+        self.assertEqual(response.status_code, 400)
         data = json.loads(response.data)
         self.assertIn('error', data)
 
