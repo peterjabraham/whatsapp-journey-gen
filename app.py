@@ -17,6 +17,7 @@ import re
 import time
 import queue
 import threading
+import tempfile
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_file, Response, stream_with_context
 from dotenv import load_dotenv
@@ -739,21 +740,25 @@ def generate_stream():
                     # Create zip and send complete event
                     if result_holder['results']:
                         results = result_holder['results']
-                        zip_buffer = io.BytesIO()
-                        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                        
+                        # Store zip to disk (works across workers)
+                        zip_id = str(time.time()).replace('.', '')
+                        zip_path = os.path.join(TEMP_DOWNLOAD_DIR, f"{zip_id}.zip")
+                        meta_path = os.path.join(TEMP_DOWNLOAD_DIR, f"{zip_id}.meta")
+                        
+                        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
                             for scenario_slug, models_dict in results.items():
                                 for model_slug, files_dict in models_dict.items():
                                     for filename, content in files_dict.items():
-                                        zip_path = f"outputs/{scenario_slug}/{model_slug}/{filename}"
-                                        zip_file.writestr(zip_path, content)
+                                        file_path = f"outputs/{scenario_slug}/{model_slug}/{filename}"
+                                        zip_file.writestr(file_path, content)
                         
-                        # Store zip for download
-                        zip_id = str(time.time()).replace('.', '')
-                        _temp_zips[zip_id] = {
-                            'buffer': zip_buffer.getvalue(),
-                            'filename': f"journeys_{list(results.keys())[0]}.zip",
-                            'expires': time.time() + 300  # 5 min expiry
-                        }
+                        # Store metadata
+                        with open(meta_path, 'w') as f:
+                            json.dump({
+                                'filename': f"journeys_{list(results.keys())[0]}.zip",
+                                'expires': time.time() + 300  # 5 min expiry
+                            }, f)
                         
                         yield f"data: {json.dumps({'type': 'complete', 'download_url': f'/api/download/{zip_id}'})}\n\n"
                     break
@@ -778,32 +783,55 @@ def generate_stream():
     )
 
 
-# Temporary storage for zip files
-_temp_zips = {}
+# Temporary storage directory for zip files (works across workers)
+TEMP_DOWNLOAD_DIR = os.path.join(tempfile.gettempdir(), 'whatsapp_journey_downloads')
+os.makedirs(TEMP_DOWNLOAD_DIR, exist_ok=True)
 
 
 @app.route('/api/download/<zip_id>')
 def download_zip(zip_id):
-    """Download a generated zip file."""
-    if zip_id not in _temp_zips:
+    """Download a generated zip file from disk."""
+    # Sanitize zip_id to prevent path traversal
+    safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', zip_id)
+    zip_path = os.path.join(TEMP_DOWNLOAD_DIR, f"{safe_id}.zip")
+    meta_path = os.path.join(TEMP_DOWNLOAD_DIR, f"{safe_id}.meta")
+    
+    if not os.path.exists(zip_path) or not os.path.exists(meta_path):
         return jsonify({"error": "Download not found or expired"}), 404
     
-    zip_data = _temp_zips[zip_id]
+    # Read metadata
+    with open(meta_path, 'r') as f:
+        meta = json.load(f)
     
     # Check expiry
-    if time.time() > zip_data['expires']:
-        del _temp_zips[zip_id]
+    if time.time() > meta.get('expires', 0):
+        try:
+            os.remove(zip_path)
+            os.remove(meta_path)
+        except:
+            pass
         return jsonify({"error": "Download expired"}), 404
     
-    # Clean up after download
-    del _temp_zips[zip_id]
+    filename = meta.get('filename', 'journeys.zip')
     
-    return send_file(
-        io.BytesIO(zip_data['buffer']),
+    # Return the file (don't delete - Flask handles temp files)
+    response = send_file(
+        zip_path,
         mimetype='application/zip',
         as_attachment=True,
-        download_name=zip_data['filename']
+        download_name=filename
     )
+    
+    # Schedule cleanup after response (in background)
+    @response.call_on_close
+    def cleanup():
+        try:
+            os.remove(zip_path)
+            os.remove(meta_path)
+        except:
+            pass
+    
+    return response
 
 
 @app.route('/api/generate', methods=['POST'])
