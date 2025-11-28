@@ -499,6 +499,8 @@ def extract_from_text(text: str, source_name: str = "document") -> ExtractedCont
     """
     Extract structured content from raw text (e.g., from PDF).
     
+    Enhanced to extract all the same attributes as URL extraction.
+    
     Args:
         text: The raw text content
         source_name: Name of the source for reference
@@ -506,48 +508,367 @@ def extract_from_text(text: str, source_name: str = "document") -> ExtractedCont
     Returns:
         ExtractedContent with extracted elements
     """
-    result = ExtractedContent(source=source_name, source_type="text")
+    result = ExtractedContent(source=source_name, source_type="pdf")
     result.raw_text = text[:5000]
     
-    # For text, we do simpler pattern matching
     lines = text.split('\n')
+    clean_lines = [l.strip() for l in lines if l.strip()]
     
-    # First non-empty substantial line is likely headline
-    for line in lines:
-        line = line.strip()
-        if 10 < len(line) < 150:
-            result.value_proposition.headline = line
+    # ========== VALUE PROPOSITION ==========
+    result.value_proposition = _extract_value_prop_from_text(clean_lines, text)
+    
+    # ========== PRODUCT INFO ==========
+    result.product = _extract_product_from_text(clean_lines, text, source_name)
+    
+    # ========== SOCIAL PROOF ==========
+    result.social_proof = _extract_social_proof_from_text(clean_lines, text)
+    
+    # ========== CTAs ==========
+    result.ctas = _extract_ctas_from_text(clean_lines, text)
+    
+    # ========== BRAND ==========
+    result.brand = _extract_brand_from_text(clean_lines, text, source_name)
+    
+    # ========== ASSETS ==========
+    result.assets = _extract_assets_from_text(text)
+    
+    return result
+
+
+def _extract_value_prop_from_text(lines: List[str], full_text: str) -> ValueProposition:
+    """Extract value proposition from text content."""
+    vp = ValueProposition()
+    
+    # Headline: First substantial line that looks like a title
+    for i, line in enumerate(lines[:10]):
+        # Skip very short lines or lines that look like headers/page numbers
+        if len(line) < 10 or len(line) > 150:
+            continue
+        if re.match(r'^(page\s*\d+|table of contents|\d+\.)', line.lower()):
+            continue
+        # Skip lines that are all caps (likely section headers)
+        if line.isupper() and len(line) > 30:
+            continue
+        vp.headline = line
+        break
+    
+    # Subheadline: Second substantial line or first paragraph-like content
+    found_headline = False
+    for line in lines[:15]:
+        if line == vp.headline:
+            found_headline = True
+            continue
+        if found_headline and 20 < len(line) < 300:
+            vp.subheadline = line
             break
     
-    # Extract bullet points as features/benefits
+    # Key benefits: Look for bullet points and benefit-like statements
     benefits = []
+    benefit_patterns = [
+        r'(?:•|-|\*|✓|✔|→|►)\s*(.{15,150})',  # Bullet points
+        r'(?:benefit|advantage|feature)s?:\s*(.{15,150})',  # Labeled benefits
+    ]
+    
+    for pattern in benefit_patterns:
+        matches = re.findall(pattern, full_text, re.I | re.M)
+        for match in matches:
+            cleaned = match.strip().rstrip('.')
+            if cleaned and cleaned not in benefits:
+                benefits.append(cleaned)
+    
+    # Also check for numbered lists
+    numbered_pattern = r'^\d+[.):]\s*(.{15,150})'
+    for line in lines:
+        match = re.match(numbered_pattern, line)
+        if match:
+            item = match.group(1).strip()
+            if item and item not in benefits:
+                benefits.append(item)
+    
+    vp.key_benefits = benefits[:5]
+    return vp
+
+
+def _extract_product_from_text(lines: List[str], full_text: str, source_name: str) -> ProductInfo:
+    """Extract product information from text content."""
+    product = ProductInfo()
+    
+    # Product name: Try to find from source filename or prominent text
+    # Check filename first (e.g., "LISA_Guide.pdf" -> "LISA Guide")
+    name_from_file = re.sub(r'[_-]', ' ', source_name.rsplit('.', 1)[0])
+    name_from_file = re.sub(r'\s+', ' ', name_from_file).strip()
+    
+    # Look for product/service name patterns in text
+    name_patterns = [
+        r'(?:introducing|welcome to|about)\s+([A-Z][A-Za-z\s]{3,30})',
+        r'(?:the|our)\s+([A-Z][A-Za-z\s]{3,30})\s+(?:is|offers|provides)',
+        r'^([A-Z][A-Za-z\s]{3,30})(?:\s*[-–:])?\s*(?:your|the|a)',
+    ]
+    
+    for pattern in name_patterns:
+        match = re.search(pattern, full_text, re.M)
+        if match:
+            product.name = match.group(1).strip()
+            break
+    
+    if not product.name:
+        product.name = name_from_file[:50] if len(name_from_file) > 3 else ""
+    
+    # Description: Find first paragraph-like content (50-500 chars)
+    for line in lines:
+        if 50 < len(line) < 500:
+            # Skip if it looks like a list item or header
+            if not line.startswith(('•', '-', '*', '✓', '✔', '1.', '2.')):
+                product.description = line
+                break
+    
+    # Features: What the product does
     features = []
+    feature_keywords = ['feature', 'include', 'offer', 'provide', 'enable', 'allow']
     
     for line in lines:
-        line = line.strip()
+        line_lower = line.lower()
+        # Check for feature indicators
+        if any(kw in line_lower for kw in feature_keywords):
+            if 10 < len(line) < 200:
+                features.append(line)
+        # Check bullet points that describe capabilities
         if line.startswith(('•', '-', '*', '✓', '✔')):
             item = line.lstrip('•-*✓✔ ').strip()
             if 10 < len(item) < 150:
-                if re.match(r'^(get|achieve|save|earn|receive|enjoy)', item.lower()):
-                    benefits.append(item)
-                else:
+                if not re.match(r'^(get|achieve|save|earn|receive|enjoy|you)', item.lower()):
                     features.append(item)
     
-    result.value_proposition.key_benefits = benefits[:5]
-    result.product.features = features[:8]
+    product.features = list(dict.fromkeys(features))[:8]  # Dedupe, max 8
     
-    # Extract stats
+    # Outcomes: What customer gets (benefit-focused)
+    outcomes = []
+    outcome_starters = r'^(get|achieve|save|earn|receive|enjoy|access|gain|unlock|discover)'
+    
+    for line in lines:
+        item = line.lstrip('•-*✓✔ ').strip()
+        if re.match(outcome_starters, item.lower()) and 10 < len(item) < 150:
+            outcomes.append(item)
+    
+    product.outcomes = outcomes[:5]
+    return product
+
+
+def _extract_social_proof_from_text(lines: List[str], full_text: str) -> SocialProof:
+    """Extract social proof from text content."""
+    sp = SocialProof()
+    
+    # Testimonials: Look for quoted text and attribution patterns
+    testimonials = []
+    
+    # Pattern 1: Text in quotes
+    quote_pattern = r'["""](.{20,300})["""]'
+    quotes = re.findall(quote_pattern, full_text)
+    testimonials.extend(quotes[:3])
+    
+    # Pattern 2: Attribution-style quotes ("... - Name, Company")
+    attribution_pattern = r'(.{20,300})\s*[-–—]\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)'
+    for match in re.finditer(attribution_pattern, full_text):
+        quote = match.group(1).strip().strip('"\'""''')
+        if quote and len(quote) > 20:
+            testimonials.append(f'{quote} - {match.group(2)}')
+    
+    sp.testimonials = list(dict.fromkeys(testimonials))[:3]
+    
+    # Stats: Extract numerical claims
     stat_patterns = [
-        r'\d+[,\d]*\+?\s*(?:customers?|users?|clients?|members?)',
-        r'\d+%\s*(?:increase|growth|improvement)',
-        r'£?\$?\d+[,\d]*(?:k|m)?\s*(?:saved|earned)',
+        r'\d+[,\d]*\+?\s*(?:customers?|users?|clients?|members?|people)',
+        r'\d+%\s*(?:increase|growth|improvement|savings?|more|better)',
+        r'(?:over|more than)\s*\d+[,\d]*\s*(?:years?|customers?|members?)',
+        r'£?\$?€?\d+[,\d]*(?:\.\d+)?(?:k|m|bn?|million|billion)?\s*(?:saved|raised|invested|earned)',
+        r'\d+\+?\s*(?:years?|countries?|locations?|offices?)\s*(?:of experience|worldwide|globally)?',
+        r'rated\s*\d+(?:\.\d+)?\s*(?:out of|/)\s*\d+',
+        r'\d+(?:\.\d+)?★?\s*(?:star|rating)',
     ]
     
     for pattern in stat_patterns:
-        matches = re.findall(pattern, text, re.I)
-        result.social_proof.stats.extend(matches[:2])
+        matches = re.findall(pattern, full_text, re.I)
+        sp.stats.extend(matches[:2])
     
-    result.social_proof.stats = list(set(result.social_proof.stats))[:5]
+    sp.stats = list(dict.fromkeys(sp.stats))[:5]
     
-    return result
+    # Trust badges: Look for certification/award mentions
+    badge_patterns = [
+        r'(?:certified|accredited|regulated)\s+by\s+([A-Za-z\s]+)',
+        r'(?:member of|affiliated with)\s+([A-Za-z\s]+)',
+        r'(?:winner|awarded?)\s+(?:of\s+)?([A-Za-z\s]+(?:award|prize))',
+        r'(ISO\s*\d+|FCA|PRA|GDPR|SOC\s*\d+)\s*(?:certified|compliant|regulated)?',
+    ]
+    
+    for pattern in badge_patterns:
+        matches = re.findall(pattern, full_text, re.I)
+        sp.trust_badges.extend([m.strip() for m in matches if m.strip()])
+    
+    sp.trust_badges = list(dict.fromkeys(sp.trust_badges))[:5]
+    return sp
+
+
+def _extract_ctas_from_text(lines: List[str], full_text: str) -> CTAs:
+    """Extract call-to-action elements from text content."""
+    ctas = CTAs()
+    
+    # Primary CTA patterns (action-oriented)
+    primary_patterns = [
+        r'(?:apply|sign up|get started|register|join|book|buy|start|try|subscribe)\s*(?:now|today|here|free)?',
+        r'(?:open|create)\s*(?:an?\s*)?(?:account|profile)',
+        r'(?:request|schedule)\s*(?:a\s*)?(?:demo|consultation|call)',
+    ]
+    
+    for pattern in primary_patterns:
+        match = re.search(pattern, full_text, re.I)
+        if match:
+            ctas.primary = match.group(0).strip().title()
+            break
+    
+    if not ctas.primary:
+        ctas.primary = "Get Started"  # Default
+    
+    # Secondary CTA patterns (info-oriented)
+    secondary_patterns = [
+        r'(?:learn|find out|discover|explore|read)\s*more',
+        r'(?:download|get)\s*(?:the\s*)?(?:guide|brochure|pdf)',
+        r'(?:contact|speak to|talk to)\s*(?:us|an? (?:advisor|expert))',
+        r'see\s*(?:how|why|what)',
+    ]
+    
+    for pattern in secondary_patterns:
+        match = re.search(pattern, full_text, re.I)
+        if match:
+            ctas.secondary = match.group(0).strip().title()
+            break
+    
+    if not ctas.secondary:
+        ctas.secondary = "Learn More"  # Default
+    
+    # Extract URLs from text
+    url_pattern = r'https?://[^\s<>"{}|\\^`\[\]]+'
+    urls = re.findall(url_pattern, full_text)
+    
+    for url in urls[:5]:
+        # Try to categorize URL by keywords
+        url_lower = url.lower()
+        if any(x in url_lower for x in ['apply', 'signup', 'register', 'join']):
+            ctas.urls[ctas.primary] = url
+        elif any(x in url_lower for x in ['learn', 'about', 'info', 'guide']):
+            ctas.urls[ctas.secondary] = url
+        elif not ctas.urls:
+            ctas.urls["Main Link"] = url
+    
+    return ctas
+
+
+def _extract_brand_from_text(lines: List[str], full_text: str, source_name: str) -> BrandElements:
+    """Extract brand elements from text content."""
+    brand = BrandElements()
+    
+    # Brand name: Look for company name patterns
+    name_patterns = [
+        r'(?:©|copyright)\s*(?:\d{4}\s*)?([A-Z][A-Za-z\s&]+(?:Ltd|Limited|Inc|LLC|plc)?)',
+        r'([A-Z][A-Za-z]+(?:\s+[A-Z][a-z]+)?)\s*(?:is|are)\s+(?:a|an|the)\s+(?:leading|trusted|premier)',
+        r'(?:about|welcome to)\s+([A-Z][A-Za-z\s&]{2,30})',
+        r'([A-Z][A-Za-z]+)\s+(?:©|®|™)',
+    ]
+    
+    for pattern in name_patterns:
+        match = re.search(pattern, full_text)
+        if match:
+            name = match.group(1).strip()
+            if 2 < len(name) < 40:
+                brand.name = name
+                break
+    
+    # Fallback to filename
+    if not brand.name:
+        name_from_file = re.sub(r'[_-]', ' ', source_name.rsplit('.', 1)[0])
+        # Take first part if it looks like a company name
+        parts = name_from_file.split()
+        if parts and parts[0][0].isupper():
+            brand.name = parts[0]
+    
+    # Colors: Look for hex codes or color mentions (rare in PDFs)
+    hex_pattern = r'#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})(?![0-9A-Fa-f])'
+    colors = re.findall(hex_pattern, full_text)
+    brand.colors = [f"#{c.upper()}" for c in colors[:6]]
+    
+    # Tone keywords: Detect from language
+    text_lower = full_text.lower()
+    tone_indicators = {
+        'professional': ['professional', 'expert', 'trusted', 'reliable', 'established', 'quality'],
+        'friendly': ['friendly', 'easy', 'simple', 'fun', 'enjoy', 'love', 'happy'],
+        'innovative': ['innovative', 'cutting-edge', 'modern', 'advanced', 'smart', 'technology'],
+        'caring': ['caring', 'support', 'help', 'understand', 'family', 'community', 'together'],
+        'premium': ['premium', 'luxury', 'exclusive', 'elite', 'bespoke', 'exceptional'],
+        'secure': ['secure', 'safe', 'protected', 'regulated', 'compliant', 'trusted'],
+    }
+    
+    for tone, keywords in tone_indicators.items():
+        if sum(1 for kw in keywords if kw in text_lower) >= 2:
+            brand.tone_keywords.append(tone)
+    
+    if not brand.tone_keywords:
+        brand.tone_keywords = ['professional']
+    
+    # Industry detection
+    industry_indicators = {
+        'financial services': ['isa', 'savings', 'investment', 'pension', 'mortgage', 'insurance', 'bank', 'finance', 'loan', 'credit'],
+        'e-commerce': ['shop', 'cart', 'checkout', 'delivery', 'shipping', 'buy now', 'order', 'product'],
+        'saas': ['software', 'platform', 'dashboard', 'integration', 'api', 'automate', 'cloud', 'subscription'],
+        'healthcare': ['health', 'medical', 'doctor', 'patient', 'clinic', 'treatment', 'wellness', 'care'],
+        'education': ['learn', 'course', 'training', 'certificate', 'student', 'education', 'teach', 'degree'],
+        'real estate': ['property', 'home', 'house', 'rent', 'estate', 'mortgage', 'apartment'],
+        'recruitment': ['job', 'career', 'hire', 'recruit', 'candidate', 'employer', 'vacancy'],
+        'travel': ['travel', 'hotel', 'flight', 'booking', 'vacation', 'holiday', 'destination'],
+    }
+    
+    best_industry = 'general business'
+    best_score = 0
+    
+    for industry, keywords in industry_indicators.items():
+        score = sum(1 for kw in keywords if kw in text_lower)
+        if score > best_score:
+            best_score = score
+            best_industry = industry
+    
+    brand.industry = best_industry if best_score >= 2 else 'general business'
+    return brand
+
+
+def _extract_assets_from_text(full_text: str) -> Assets:
+    """Extract asset references from text content."""
+    assets = Assets()
+    
+    # URLs
+    url_pattern = r'https?://[^\s<>"{}|\\^`\[\]]+'
+    urls = re.findall(url_pattern, full_text)
+    
+    for url in urls:
+        url_lower = url.lower()
+        if url_lower.endswith('.pdf'):
+            assets.pdfs.append(url)
+        elif any(x in url_lower for x in ['youtube', 'vimeo', 'video', '.mp4', '.webm']):
+            assets.videos.append(url)
+        elif any(url_lower.endswith(x) for x in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
+            assets.images.append(url)
+    
+    # Look for file references
+    file_patterns = [
+        r'(?:download|see|view|refer to)\s*(?:the\s*)?([A-Za-z0-9_-]+\.(?:pdf|doc|docx))',
+        r'(?:attached|enclosed|included):\s*([A-Za-z0-9_-]+\.(?:pdf|doc|docx))',
+    ]
+    
+    for pattern in file_patterns:
+        matches = re.findall(pattern, full_text, re.I)
+        assets.pdfs.extend(matches)
+    
+    # Dedupe
+    assets.pdfs = list(dict.fromkeys(assets.pdfs))[:5]
+    assets.videos = list(dict.fromkeys(assets.videos))[:3]
+    assets.images = list(dict.fromkeys(assets.images))[:10]
+    
+    return assets
 
