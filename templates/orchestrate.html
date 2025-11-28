@@ -8,6 +8,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
+        /* Ensure all text is legible on purple background */
+        body, p, span, label, h1, h2, h3, h4, div {
+            color: #ffffff;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .form-group label {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        
+        .card h3 {
+            color: #ffffff !important;
+        }
+        
+        .card p {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
         .orchestrate-container {
             max-width: 800px;
             margin: 0 auto;
@@ -28,18 +50,19 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             transition: all 0.2s;
         }
         
         .source-tab:hover {
             background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
         }
         
         .source-tab.active {
             background: var(--accent);
-            color: white;
+            color: #ffffff;
             border-color: var(--accent);
         }
         
@@ -153,13 +176,13 @@
         
         .journey-type-btn h3 {
             margin: 0 0 5px 0;
-            color: var(--text-primary);
+            color: #ffffff;
         }
         
         .journey-type-btn p {
             margin: 0;
             font-size: 14px;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
         }
         
         .optional-fields {
@@ -173,12 +196,12 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
             margin-bottom: 20px;
         }
         
         .optional-toggle:hover {
-            color: var(--text-primary);
+            color: #ffffff;
         }
         
         .optional-content {
@@ -259,11 +282,12 @@
         .step-name {
             font-weight: 500;
             margin-bottom: 3px;
+            color: #ffffff;
         }
         
         .step-message {
             font-size: 13px;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
         }
         
         .spinner {

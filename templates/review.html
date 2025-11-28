@@ -8,6 +8,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
+        /* Ensure all text is legible on purple background */
+        body, p, span, label, h1, h2, h3, h4, div {
+            color: #ffffff;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .sidebar-card h3 {
+            color: #ffffff !important;
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        .stat-value {
+            color: #ffffff !important;
+        }
+        
+        .step-item {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .step-item.complete {
+            color: #10b981 !important;
+        }
+        
         .review-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -44,19 +73,19 @@
             background: rgba(255, 255, 255, 0.1);
             border: none;
             border-radius: 4px;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             font-size: 13px;
         }
         
         .editor-toolbar button:hover {
             background: rgba(255, 255, 255, 0.2);
-            color: var(--text-primary);
+            color: #ffffff;
         }
         
         .editor-toolbar button.active {
             background: var(--accent);
-            color: white;
+            color: #ffffff;
         }
         
         .markdown-editor {
@@ -66,7 +95,7 @@
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 0 0 8px 8px;
-            color: var(--text-primary);
+            color: #ffffff;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 14px;
             line-height: 1.6;
@@ -139,11 +168,11 @@
         }
         
         .stat-label {
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
         }
         
         .stat-value {
-            color: var(--text-primary);
+            color: #ffffff;
             font-weight: 500;
         }
         
