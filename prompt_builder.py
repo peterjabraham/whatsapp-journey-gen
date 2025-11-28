@@ -1277,6 +1277,8 @@ All journeys must:
 11. **NO invented use cases** - Use only what the user described in the BRIEF
 12. **NO "Visual Identity" card** - Do not include a card showing colors (Primary, Accent, Background)
 13. **NO metrics-section in header** - Do not show Duration/Steps/Paths metrics in header
+14. **NO "Success Metrics" section** - Do not include any success metrics, KPIs, or conversion rate targets in full_detail_workflow.html
+15. **NO "Technical Setup" section** - Do not include technical setup, WATI configuration, API details, or implementation notes in full_detail_workflow.html
 
 ## CRITICAL: YOU MUST INCLUDE IN BOTH HTML FILES
 
