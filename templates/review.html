@@ -495,10 +495,11 @@
             }
         });
         
-        // Generate journey
+        // Generate journey - store brief in sessionStorage and redirect
         document.getElementById('generate-btn').addEventListener('click', async () => {
             const filename = generateFilename('-PROMPT.md');
-            // Download the prompt file first
+            
+            // Download the prompt file
             const response = await fetch('/api/brief-to-prompt', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -515,13 +516,19 @@
                 a.href = url;
                 a.download = filename;
                 a.click();
-                URL.revokeObjectURL(url);
                 
-                // Then redirect to generator
+                // Store the prompt content in sessionStorage for the generator
+                sessionStorage.setItem('pending_prompt', JSON.stringify({
+                    filename: filename,
+                    content: editor.value,
+                    scenario: generateFilename('') // company-campaign-date
+                }));
+                
+                // Show instructions and redirect
                 setTimeout(() => {
-                    alert('Prompt file downloaded! Go to the Journey Generator and upload it to generate your journey.');
-                    window.location.href = '/';
-                }, 500);
+                    URL.revokeObjectURL(url);
+                    window.location.href = '/?from=review';
+                }, 300);
             }
         });
     </script>

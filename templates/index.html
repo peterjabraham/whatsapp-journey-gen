@@ -69,6 +69,52 @@
         let selectedModels = [];
         const maxModels = 3;
 
+        // Check for pending prompt from review page
+        function loadPendingPrompt() {
+            const pendingPromptJson = sessionStorage.getItem('pending_prompt');
+            if (pendingPromptJson) {
+                try {
+                    const pendingPrompt = JSON.parse(pendingPromptJson);
+                    
+                    // Auto-fill scenario
+                    if (pendingPrompt.scenario) {
+                        document.getElementById('scenario').value = pendingPrompt.scenario;
+                    }
+                    
+                    // Create a fake file for the content
+                    if (pendingPrompt.content) {
+                        const blob = new Blob([pendingPrompt.content], { type: 'text/markdown' });
+                        const file = new File([blob], pendingPrompt.filename || 'prompt.md', { type: 'text/markdown' });
+                        
+                        // Use DataTransfer to set the file
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        document.getElementById('promptFile').files = dataTransfer.files;
+                        document.getElementById('fileName').textContent = file.name;
+                        document.getElementById('fileUploadArea').classList.add('has-file');
+                    }
+                    
+                    // Clear pending prompt
+                    sessionStorage.removeItem('pending_prompt');
+                    
+                    // Show success message
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('from') === 'review') {
+                        const successMsg = document.getElementById('successMessage');
+                        successMsg.textContent = 'Prompt loaded from Smart Builder! Select model(s) and click Generate.';
+                        successMsg.style.display = 'block';
+                        successMsg.style.background = 'rgba(16, 185, 129, 0.1)';
+                        successMsg.style.borderColor = '#10b981';
+                    }
+                    
+                    // Update button state
+                    setTimeout(updateGenerateButton, 100);
+                } catch (e) {
+                    console.error('Error loading pending prompt:', e);
+                }
+            }
+        }
+        
         // Load models on page load
         fetch('/api/models')
             .then(response => {
@@ -106,6 +152,9 @@
                     `;
                     modelsList.appendChild(checkbox);
                 });
+                
+                // Load pending prompt if coming from review page
+                loadPendingPrompt();
             })
             .catch(error => {
                 console.error('Error loading models:', error);
