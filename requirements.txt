@@ -1,6 +1,22 @@
-requests>=2.31.0
-python-dotenv>=1.0.0
+# Core Flask
 Flask>=3.0.0
 gunicorn>=21.2.0
 gevent>=23.9.0
 
+# HTTP and scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# PDF extraction
+pymupdf>=1.24.0
+pymupdf4llm>=0.0.17
+
+# Claude API for LLM enhancement (optional)
+anthropic>=0.39.0
+
+# Markdown rendering for preview
+markdown>=3.5.0

@@ -11,6 +11,13 @@ from flask import Flask, render_template, request, jsonify, send_file
 from journey_generator import generate_journeys
 from prompt_builder import generate_prompt_markdown
 
+# Import orchestrator (optional - may not be installed yet)
+try:
+    from agents import Orchestrator, OrchestrationResult
+    ORCHESTRATOR_AVAILABLE = True
+except ImportError:
+    ORCHESTRATOR_AVAILABLE = False
+
 # Monkey patch for gevent compatibility (if using gevent workers)
 try:
     from gevent import monkey
@@ -221,6 +228,206 @@ def extract_colors():
     except Exception as e:
         return jsonify({"error": f"Failed to extract colors: {str(e)}"}), 500
 
+
+# ============================================================================
+# ORCHESTRATOR ROUTES (New multi-agent pipeline)
+# ============================================================================
+
+@app.route('/orchestrate')
+def orchestrate_page():
+    """Serve the new orchestrator input page."""
+    return render_template('orchestrate.html')
+
+
+@app.route('/review')
+def review_page():
+    """Serve the brief review/edit page."""
+    return render_template('review.html')
+
+
+@app.route('/api/orchestrate', methods=['POST'])
+def run_orchestration():
+    """
+    Run the orchestration pipeline to extract and analyze content.
+    
+    Accepts:
+    - urls[]: List of URLs to scrape
+    - pdfs: PDF file uploads
+    - journey_type: "B2B" or "B2C"
+    - user_inputs: JSON string with user preferences
+    """
+    if not ORCHESTRATOR_AVAILABLE:
+        return jsonify({
+            "error": "Orchestrator not available. Install dependencies: pip install pymupdf pymupdf4llm anthropic"
+        }), 500
+    
+    try:
+        # Get URLs
+        urls = request.form.getlist('urls[]')
+        urls = [u.strip() for u in urls if u.strip()]
+        
+        # Get PDF files
+        pdf_files = []
+        if 'pdfs' in request.files:
+            for pdf in request.files.getlist('pdfs'):
+                if pdf.filename and pdf.filename.endswith('.pdf'):
+                    pdf_files.append((pdf.filename, pdf.read()))
+        
+        # Validate we have at least one source
+        if not urls and not pdf_files:
+            return jsonify({"error": "Please provide at least one URL or PDF"}), 400
+        
+        # Get journey type
+        journey_type = request.form.get('journey_type', 'B2C')
+        if journey_type not in ['B2B', 'B2C']:
+            journey_type = 'B2C'
+        
+        # Get user inputs (optional overrides)
+        user_inputs = {}
+        user_inputs_json = request.form.get('user_inputs', '{}')
+        try:
+            user_inputs = json.loads(user_inputs_json)
+        except json.JSONDecodeError:
+            pass
+        
+        # Add any direct form fields to user_inputs
+        if request.form.get('company_name'):
+            user_inputs['company_name'] = request.form.get('company_name')
+        if request.form.get('offer_headline'):
+            user_inputs.setdefault('offer', {})['headline'] = request.form.get('offer_headline')
+        if request.form.get('discount_code'):
+            user_inputs.setdefault('offer', {})['discount_code'] = request.form.get('discount_code')
+        if request.form.get('timing_strategy'):
+            user_inputs.setdefault('timing', {})['strategy'] = request.form.get('timing_strategy')
+        
+        # Run orchestration
+        orchestrator = Orchestrator()
+        
+        # Check if LLM enhancement is requested
+        use_llm = request.form.get('use_llm', 'false').lower() == 'true'
+        
+        if use_llm:
+            result = orchestrator.run_with_llm_reasoning(
+                urls=urls,
+                pdf_files=pdf_files,
+                journey_type=journey_type,
+                user_inputs=user_inputs
+            )
+        else:
+            result = orchestrator.run(
+                urls=urls,
+                pdf_files=pdf_files,
+                journey_type=journey_type,
+                user_inputs=user_inputs
+            )
+        
+        return jsonify(result.to_dict())
+        
+    except Exception as e:
+        return jsonify({"error": f"Orchestration failed: {str(e)}"}), 500
+
+
+@app.route('/api/save-brief', methods=['POST'])
+def save_brief():
+    """
+    Save the edited brief and prepare for journey generation.
+    
+    Accepts:
+    - brief: The edited markdown content
+    - filename: Optional filename
+    """
+    try:
+        data = request.get_json()
+        if not data or 'brief' not in data:
+            return jsonify({"error": "Brief content is required"}), 400
+        
+        brief_content = data['brief']
+        filename = data.get('filename', 'journey_brief.md')
+        
+        # Sanitize filename
+        filename = sanitize_filename(filename)
+        if not filename.endswith('.md'):
+            filename += '.md'
+        
+        # Return as downloadable file
+        return send_file(
+            io.BytesIO(brief_content.encode('utf-8')),
+            mimetype='text/markdown',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({"error": f"Failed to save brief: {str(e)}"}), 500
+
+
+@app.route('/api/brief-to-prompt', methods=['POST'])
+def brief_to_prompt():
+    """
+    Convert an orchestrated brief to a journey generator prompt.
+    
+    Takes the combined brief markdown and formats it for the
+    existing journey generator pipeline.
+    """
+    try:
+        data = request.get_json()
+        if not data or 'brief' not in data:
+            return jsonify({"error": "Brief content is required"}), 400
+        
+        brief_content = data['brief']
+        
+        # The brief is already in the format needed for journey generation
+        # Just wrap it with the journey generator header
+        prompt_content = f"""# PROMPT: WhatsApp Journey Generator
+
+{brief_content}
+
+---
+
+## OUTPUT FORMAT
+
+Output your response in this exact order with these exact delimiters:
+
+```text
+=== CONFIG YAML ===
+(normalized CONFIG object in YAML format)
+
+=== JOURNEY MARKDOWN ===
+(complete journey specification in markdown)
+
+=== HTML A – SUMMARY WORKFLOW ===
+```file:summary_workflow.html
+(complete HTML document)
+```
+
+=== HTML B – FULL DETAIL WORKFLOW ===
+```file:full_detail_workflow.html
+(complete HTML document)
+```
+```
+
+Ensure all messages respect platform limits and brand voice.
+"""
+        
+        filename = data.get('filename', 'PROMPT_orchestrated.md')
+        filename = sanitize_filename(filename)
+        if not filename.endswith('.md'):
+            filename += '.md'
+        
+        return send_file(
+            io.BytesIO(prompt_content.encode('utf-8')),
+            mimetype='text/markdown',
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        return jsonify({"error": f"Failed to convert brief: {str(e)}"}), 500
+
+
+# ============================================================================
+# EXISTING ROUTES
+# ============================================================================
 
 @app.route('/api/models', methods=['GET'])
 def get_models():
