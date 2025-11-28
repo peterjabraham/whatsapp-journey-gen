@@ -528,11 +528,95 @@ def brief_to_prompt():
         
         brief_content = data['brief']
         
+        # Extract colors from brief if present, use defaults otherwise
+        primary_color = "#1e3a5f"
+        accent_color = "#e67e22"
+        background_color = "#f5f7fa"
+        
+        # Try to extract colors from the brief
+        import re
+        primary_match = re.search(r'Primary Color[:\s|]+\s*([#][0-9A-Fa-f]{6})', brief_content)
+        accent_match = re.search(r'Accent Color[:\s|]+\s*([#][0-9A-Fa-f]{6})', brief_content)
+        bg_match = re.search(r'Background Color[:\s|]+\s*([#][0-9A-Fa-f]{6})', brief_content)
+        
+        if primary_match:
+            primary_color = primary_match.group(1)
+        if accent_match:
+            accent_color = accent_match.group(1)
+        if bg_match:
+            background_color = bg_match.group(1)
+        
         # The brief is already in the format needed for journey generation
-        # Just wrap it with the journey generator header
+        # Add HTML template specifications
         prompt_content = f"""# PROMPT: WhatsApp Journey Generator
 
+You are an expert WhatsApp marketing automation journey designer.
+
+## CRITICAL RULES:
+1. Use ONLY the data provided in the brief below - do not invent companies, products, or URLs
+2. NO emojis anywhere in the HTML output
+3. NO icons or icon fonts
+4. Follow the exact HTML structure provided
+
 {brief_content}
+
+---
+
+## OUTPUT SPECIFICATIONS - CRITICAL: FOLLOW EXACTLY
+
+### COLOR SCHEME (Use these exact colors from the brief)
+
+```css
+:root {{
+  --primary: {primary_color};
+  --primary-light: {primary_color}20;
+  --accent: {accent_color};
+  --accent-light: {accent_color}20;
+  --background: {background_color};
+  --white: #ffffff;
+  --text-dark: #1a1a2e;
+  --text-light: #6b7280;
+  --success: #10b981;
+  --broadcast: #3b82f6;
+}}
+```
+
+### CRITICAL: DO NOT INCLUDE THESE SECTIONS
+- NO "Visual Identity" card showing colors
+- NO metrics row in header (Duration, Steps, Paths, etc.)
+- NO "Success Metrics" or KPIs section
+- NO "Technical Setup" or implementation notes
+- NO emojis or icons anywhere
+
+### HTML STRUCTURE REQUIREMENTS
+
+Both HTML files must:
+1. Use the color scheme above
+2. Have a dark header with gradient
+3. Use white cards on light background
+4. Have professional business document styling
+5. Include clickable CTA buttons using `<a href="URL" target="_blank">`
+6. List all URLs and assets at the bottom
+
+### SUMMARY WORKFLOW HTML - Structure:
+- Header with journey title
+- Journey Overview card (Entry Point, Audience, Offer, Duration)
+- Day sections with:
+  - Day badge (D0, D1, D2, etc.)
+  - Step cards showing: Step number, timing, message type, brief content
+- Assets Required section at bottom
+- Key URLs section at bottom
+
+### FULL DETAIL WORKFLOW HTML - Structure:
+- Header with journey title
+- Full day header bars (full width, colored)
+- Detailed step cards with:
+  - Full message content/copy
+  - CTA buttons as clickable links
+  - Asset references
+- Wait indicators between steps
+- Complete Assets table at bottom
+- Complete URLs table at bottom
 
 ---
 
@@ -549,12 +633,12 @@ Output your response in this exact order with these exact delimiters:
 
 === HTML A – SUMMARY WORKFLOW ===
 ```file:summary_workflow.html
-(complete HTML document)
+(complete HTML document following structure above)
 ```
 
 === HTML B – FULL DETAIL WORKFLOW ===
 ```file:full_detail_workflow.html
-(complete HTML document)
+(complete HTML document following structure above)
 ```
 ```
 
