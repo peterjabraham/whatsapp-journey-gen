@@ -694,12 +694,6 @@ All journeys must:
   <div class="header">
     <h1>{brief['company_name']} {brief['product_name']} Journey</h1>
     <p class="subtitle">{brief['campaign_name'] or brief['product_name']} - Summary Workflow</p>
-    <div class="metrics-row">
-      <div class="metric"><div class="metric-label">Duration</div><div class="metric-value">[X] Days</div></div>
-      <div class="metric"><div class="metric-label">Total Steps</div><div class="metric-value">[X]</div></div>
-      <div class="metric"><div class="metric-label">Decision Points</div><div class="metric-value">[X]</div></div>
-      <div class="metric"><div class="metric-label">Paths</div><div class="metric-value">[X]</div></div>
-    </div>
   </div>
   
   <div class="container">
@@ -981,26 +975,33 @@ All journeys must:
       text-align: right;
     }}
     
-    /* BUTTONS SECTION */
+    /* BUTTONS SECTION - Clickable links */
     .buttons-section {{
       margin-top: 20px;
     }}
     .button-item {{
-      background: {brand['accent_color']}15;
-      border: 1px solid {brand['accent_color']}40;
-      border-radius: 8px;
-      padding: 15px;
       margin-bottom: 10px;
     }}
-    .button-text {{
+    .button-item a {{
+      display: block;
+      background: {brand['accent_color']};
+      color: #ffffff;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 8px;
       font-weight: 600;
-      color: #1a1a2e;
-      margin-bottom: 5px;
+      text-align: center;
+      transition: background 0.2s;
+    }}
+    .button-item a:hover {{
+      background: {brand['primary_color']};
     }}
     .button-url {{
-      font-size: 13px;
+      font-size: 12px;
       color: {brand['primary_color']};
       word-break: break-all;
+      margin-top: 5px;
+      text-align: center;
     }}
     
     /* AUTO-REPLY BOX */
@@ -1101,12 +1102,6 @@ All journeys must:
   <div class="header">
     <h1>{brief['company_name']} {brief['product_name']} Journey</h1>
     <p class="subtitle">Full Detailed Workflow - Complete Message Content</p>
-    <div class="metrics-row">
-      <div class="metric"><div class="metric-label">Total Messages</div><div class="metric-value">[X]</div></div>
-      <div class="metric"><div class="metric-label">Interactive</div><div class="metric-value">[X]</div></div>
-      <div class="metric"><div class="metric-label">Days</div><div class="metric-value">[X]</div></div>
-      <div class="metric"><div class="metric-label">Hours</div><div class="metric-value">[X]</div></div>
-    </div>
   </div>
   
   <div class="container">
@@ -1280,12 +1275,15 @@ All journeys must:
 9. **NO GRADIENTS** on cards (only on the main header)
 10. **NO placeholder URLs** - Never use "example.com" - use the actual URLs provided
 11. **NO invented use cases** - Use only what the user described in the BRIEF
+12. **NO "Visual Identity" card** - Do not include a card showing colors (Primary, Accent, Background)
+13. **NO metrics-section in header** - Do not show Duration/Steps/Paths metrics in header
 
 ## CRITICAL: YOU MUST INCLUDE IN BOTH HTML FILES
 
 ### In EVERY CTA Button:
-- The button text
-- The FULL URL displayed below the button (from user's input: {brief['main_product_url']} or {brief['application_url']})
+- The button text as a CLICKABLE LINK using `<a href="URL" target="_blank">Button Text</a>`
+- Use the actual URLs from user input: {brief['main_product_url']} or {brief['application_url']}
+- Make buttons clickable so users can verify links work
 
 ### At the BOTTOM of BOTH HTML files, include these two sections:
 

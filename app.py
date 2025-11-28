@@ -590,6 +590,138 @@ def get_models():
         return jsonify({"error": f"Failed to load models: {str(e)}"}), 500
 
 
+@app.route('/api/generate/stream', methods=['POST'])
+def generate_stream():
+    """
+    Generate journeys with Server-Sent Events (SSE) for real-time progress.
+    """
+    # Parse form data
+    if 'prompt_file' not in request.files:
+        return jsonify({"error": "No prompt file uploaded"}), 400
+    
+    file = request.files['prompt_file']
+    if file.filename == '' or not file.filename.endswith('.md'):
+        return jsonify({"error": "File must be a .md file"}), 400
+    
+    scenario = request.form.get('scenario', '').strip()
+    if not scenario:
+        return jsonify({"error": "Scenario is required"}), 400
+    
+    models = request.form.getlist('models[]')
+    if not models or len(models) > 3:
+        return jsonify({"error": "Select 1-3 models"}), 400
+    
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        return jsonify({"error": "API key not configured"}), 500
+    
+    prompt_content = file.read().decode('utf-8')
+    
+    # Create queue for progress updates
+    progress_queue = queue.Queue()
+    result_holder = {'results': None, 'error': None}
+    
+    def run_generation():
+        """Run generation in background thread."""
+        try:
+            from journey_generator import generate_journeys_with_progress
+            results = generate_journeys_with_progress(
+                prompt_content, scenario, models, api_key,
+                progress_callback=lambda p, m, mi=None, ms=None: progress_queue.put({
+                    'type': 'progress',
+                    'percent': p,
+                    'message': m,
+                    'model_index': mi,
+                    'model_status': ms
+                })
+            )
+            result_holder['results'] = results
+            progress_queue.put({'type': 'done'})
+        except Exception as e:
+            result_holder['error'] = str(e)
+            progress_queue.put({'type': 'error', 'message': str(e)})
+    
+    # Start generation thread
+    gen_thread = threading.Thread(target=run_generation)
+    gen_thread.start()
+    
+    def generate_events():
+        """Generator for SSE events."""
+        while True:
+            try:
+                event = progress_queue.get(timeout=120)
+                
+                if event['type'] == 'done':
+                    # Create zip and send complete event
+                    if result_holder['results']:
+                        results = result_holder['results']
+                        zip_buffer = io.BytesIO()
+                        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                            for scenario_slug, models_dict in results.items():
+                                for model_slug, files_dict in models_dict.items():
+                                    for filename, content in files_dict.items():
+                                        zip_path = f"outputs/{scenario_slug}/{model_slug}/{filename}"
+                                        zip_file.writestr(zip_path, content)
+                        
+                        # Store zip for download
+                        zip_id = str(time.time()).replace('.', '')
+                        _temp_zips[zip_id] = {
+                            'buffer': zip_buffer.getvalue(),
+                            'filename': f"journeys_{list(results.keys())[0]}.zip",
+                            'expires': time.time() + 300  # 5 min expiry
+                        }
+                        
+                        yield f"data: {json.dumps({'type': 'complete', 'download_url': f'/api/download/{zip_id}'})}\n\n"
+                    break
+                elif event['type'] == 'error':
+                    yield f"data: {json.dumps(event)}\n\n"
+                    break
+                else:
+                    yield f"data: {json.dumps(event)}\n\n"
+                    
+            except queue.Empty:
+                # Heartbeat
+                yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
+    
+    return Response(
+        stream_with_context(generate_events()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
+        }
+    )
+
+
+# Temporary storage for zip files
+_temp_zips = {}
+
+
+@app.route('/api/download/<zip_id>')
+def download_zip(zip_id):
+    """Download a generated zip file."""
+    if zip_id not in _temp_zips:
+        return jsonify({"error": "Download not found or expired"}), 404
+    
+    zip_data = _temp_zips[zip_id]
+    
+    # Check expiry
+    if time.time() > zip_data['expires']:
+        del _temp_zips[zip_id]
+        return jsonify({"error": "Download expired"}), 404
+    
+    # Clean up after download
+    del _temp_zips[zip_id]
+    
+    return send_file(
+        io.BytesIO(zip_data['buffer']),
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=zip_data['filename']
+    )
+
+
 @app.route('/api/generate', methods=['POST'])
 def generate():
     """Generate journeys from uploaded prompt file."""

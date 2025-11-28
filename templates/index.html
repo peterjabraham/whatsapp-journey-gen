@@ -8,6 +8,154 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Progress Section Styles */
+        .progress-section {
+            margin-top: 30px;
+        }
+        
+        .progress-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+        }
+        
+        .progress-card h3 {
+            color: #ffffff;
+            margin: 0 0 25px 0;
+            text-align: center;
+        }
+        
+        .progress-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-percent {
+            font-size: 18px;
+            font-weight: 600;
+            color: #10b981;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        .current-status {
+            text-align: center;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: #ffffff;
+        }
+        
+        .model-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .model-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .model-item.active {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+        }
+        
+        .model-item.complete {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+        }
+        
+        .model-item.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+        
+        .model-item .model-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            color: #ffffff;
+        }
+        
+        .model-item.active .model-icon {
+            background: #10b981;
+        }
+        
+        .model-item.complete .model-icon {
+            background: #10b981;
+        }
+        
+        .model-item.error .model-icon {
+            background: #ef4444;
+        }
+        
+        .model-item .model-name {
+            flex: 1;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        
+        .model-item .model-status {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .model-item.complete .model-status {
+            color: #10b981;
+        }
+        
+        .model-item.error .model-status {
+            color: #ef4444;
+        }
+        
+        /* Nav link style */
+        .nav-link {
+            background: #10b981 !important;
+            color: #ffffff !important;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover {
+            background: #059669 !important;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -59,6 +207,31 @@
                     <span class="btn-spinner" id="spinner" style="display: none;">⏳</span>
                 </button>
             </form>
+
+            <!-- Progress Section -->
+            <div class="progress-section" id="progress-section" style="display: none;">
+                <div class="progress-card">
+                    <h3 id="progress-title">Generating Journeys...</h3>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                        </div>
+                        <div class="progress-percent" id="progress-percent">0%</div>
+                    </div>
+                    
+                    <!-- Current Status -->
+                    <div class="current-status" id="current-status">
+                        Initializing...
+                    </div>
+                    
+                    <!-- Model Progress -->
+                    <div class="model-progress" id="model-progress">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
 
             <div id="errorMessage" class="error-message" style="display: none;"></div>
             <div id="successMessage" class="success-message" style="display: none;"></div>
@@ -235,7 +408,53 @@
         // Scenario input
         document.getElementById('scenario').addEventListener('input', updateGenerateButton);
 
-        // Form submission
+        // Progress tracking functions
+        function showProgress() {
+            document.getElementById('progress-section').style.display = 'block';
+            document.getElementById('generateForm').style.opacity = '0.5';
+            document.getElementById('generateForm').style.pointerEvents = 'none';
+        }
+        
+        function hideProgress() {
+            document.getElementById('progress-section').style.display = 'none';
+            document.getElementById('generateForm').style.opacity = '1';
+            document.getElementById('generateForm').style.pointerEvents = 'auto';
+        }
+        
+        function updateProgress(percent, message) {
+            document.getElementById('progress-bar-fill').style.width = percent + '%';
+            document.getElementById('progress-percent').textContent = percent + '%';
+            document.getElementById('current-status').textContent = message;
+        }
+        
+        function initModelProgress(models) {
+            const container = document.getElementById('model-progress');
+            container.innerHTML = models.map((modelId, i) => `
+                <div class="model-item" id="model-progress-${i}">
+                    <div class="model-icon">${i + 1}</div>
+                    <div class="model-name">${modelId}</div>
+                    <div class="model-status">Waiting...</div>
+                </div>
+            `).join('');
+        }
+        
+        function updateModelProgress(index, status, message) {
+            const item = document.getElementById(`model-progress-${index}`);
+            if (!item) return;
+            
+            item.className = 'model-item ' + status;
+            item.querySelector('.model-status').textContent = message;
+            
+            if (status === 'active') {
+                item.querySelector('.model-icon').textContent = '⏳';
+            } else if (status === 'complete') {
+                item.querySelector('.model-icon').textContent = '✓';
+            } else if (status === 'error') {
+                item.querySelector('.model-icon').textContent = '✗';
+            }
+        }
+
+        // Form submission with progress tracking
         document.getElementById('generateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -247,72 +466,153 @@
             });
 
             const generateBtn = document.getElementById('generateBtn');
-            const spinner = document.getElementById('spinner');
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
 
-            // Show loading state
+            // Show progress UI
             generateBtn.disabled = true;
-            spinner.style.display = 'inline';
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
+            showProgress();
+            updateProgress(0, 'Starting generation...');
+            initModelProgress(selectedModels);
 
             try {
-                const response = await fetch('/api/generate', {
+                // Try SSE streaming first
+                const response = await fetch('/api/generate/stream', {
                     method: 'POST',
                     body: formData
                 });
-
-                if (response.ok) {
-                    // Check if response is a zip file
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/zip')) {
-                        // Download zip file
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'journeys.zip';
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
-
-                        successMessage.textContent = 'Journeys generated successfully! Download started.';
-                        successMessage.style.display = 'block';
-                    } else {
-                        // Try to parse as JSON error
-                        try {
-                            const error = await response.json();
-                            errorMessage.textContent = error.error || 'An error occurred';
-                        } catch (e) {
-                            errorMessage.textContent = 'Unexpected response format from server';
-                        }
-                        errorMessage.style.display = 'block';
-                    }
-                } else {
-                    // Try to parse error as JSON
-                    try {
-                        const contentType = response.headers.get("content-type");
-                        if (contentType && contentType.includes("application/json")) {
-                            const error = await response.json();
-                            errorMessage.textContent = error.error || 'An error occurred';
-                        } else {
-                            const text = await response.text();
-                            errorMessage.textContent = `Server error (${response.status}): ${text.substring(0, 200)}`;
-                        }
-                    } catch (e) {
-                        errorMessage.textContent = `Server error (${response.status}). Please check server logs.`;
-                    }
-                    errorMessage.style.display = 'block';
+                
+                if (!response.ok) {
+                    // Fall back to regular generate
+                    throw new Error('SSE not available');
                 }
+                
+                // Read SSE stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let downloadUrl = null;
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Process complete events
+                    const lines = buffer.split('\n\n');
+                    buffer = lines.pop() || '';
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const event = JSON.parse(line.slice(6));
+                                
+                                if (event.type === 'progress') {
+                                    updateProgress(event.percent, event.message);
+                                    if (event.model_index !== undefined) {
+                                        updateModelProgress(event.model_index, 'active', event.model_status || 'Processing...');
+                                    }
+                                } else if (event.type === 'model_complete') {
+                                    updateModelProgress(event.model_index, 'complete', 'Complete');
+                                } else if (event.type === 'model_error') {
+                                    updateModelProgress(event.model_index, 'error', event.error || 'Error');
+                                } else if (event.type === 'complete') {
+                                    updateProgress(100, 'Complete! Downloading...');
+                                    document.getElementById('progress-title').textContent = 'Generation Complete!';
+                                    downloadUrl = event.download_url;
+                                } else if (event.type === 'error') {
+                                    throw new Error(event.message);
+                                }
+                            } catch (parseErr) {
+                                console.error('Parse error:', parseErr);
+                            }
+                        }
+                    }
+                }
+                
+                // Download the file
+                if (downloadUrl) {
+                    const downloadResponse = await fetch(downloadUrl);
+                    const blob = await downloadResponse.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = downloadResponse.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'journeys.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    successMessage.textContent = 'Journeys generated successfully! Download started.';
+                    successMessage.style.display = 'block';
+                }
+                
             } catch (error) {
-                errorMessage.textContent = `Error: ${error.message}`;
-                errorMessage.style.display = 'block';
+                console.log('Falling back to regular POST:', error.message);
+                
+                // Fallback to regular POST with simulated progress
+                updateProgress(10, 'Processing (fallback mode)...');
+                
+                // Simulate progress
+                let progress = 10;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += Math.random() * 10;
+                        updateProgress(Math.min(90, Math.round(progress)), 'Generating journeys...');
+                    }
+                }, 2000);
+                
+                try {
+                    const response = await fetch('/api/generate', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    clearInterval(progressInterval);
+                    
+                    if (response.ok) {
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/zip')) {
+                            updateProgress(100, 'Complete! Downloading...');
+                            document.getElementById('progress-title').textContent = 'Generation Complete!';
+                            
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'journeys.zip';
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+
+                            successMessage.textContent = 'Journeys generated successfully! Download started.';
+                            successMessage.style.display = 'block';
+                        } else {
+                            const error = await response.json();
+                            throw new Error(error.error || 'An error occurred');
+                        }
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.error || `Server error (${response.status})`);
+                    }
+                } catch (fallbackError) {
+                    clearInterval(progressInterval);
+                    errorMessage.textContent = fallbackError.message;
+                    errorMessage.style.display = 'block';
+                    document.getElementById('progress-title').textContent = 'Error';
+                    updateProgress(0, fallbackError.message);
+                }
             } finally {
-                generateBtn.disabled = false;
-                spinner.style.display = 'none';
-                updateGenerateButton();
+                setTimeout(() => {
+                    hideProgress();
+                    generateBtn.disabled = false;
+                    updateGenerateButton();
+                }, 2000);
             }
         });
     </script>

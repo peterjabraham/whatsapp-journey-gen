@@ -207,3 +207,67 @@ def generate_journeys(
 
     return results
 
+
+def generate_journeys_with_progress(
+    prompt_content: str,
+    scenario: str,
+    models: List[str],
+    api_key: str,
+    progress_callback=None,
+) -> Dict[str, Dict[str, str]]:
+    """
+    Generate journeys with progress callback for real-time updates.
+
+    Args:
+        prompt_content: Full markdown prompt file content
+        scenario: Scenario description
+        models: List of model IDs to use
+        api_key: OpenRouter API key
+        progress_callback: Function(percent, message, model_index, model_status)
+
+    Returns:
+        Same structure as generate_journeys
+    """
+    def report(percent, message, model_index=None, model_status=None):
+        if progress_callback:
+            progress_callback(percent, message, model_index, model_status)
+    
+    report(5, 'Preparing prompt...')
+    prompt_body = extract_prompt_body(prompt_content)
+    scenario_slug = slugify_scenario(scenario)
+
+    results = {scenario_slug: {}}
+    total_models = len(models)
+    
+    report(10, f'Starting generation for {total_models} model(s)...')
+
+    for i, model in enumerate(models):
+        # Calculate progress range for this model
+        model_start = 10 + (80 * i // total_models)
+        model_end = 10 + (80 * (i + 1) // total_models)
+        
+        model_slug = slugify_model(model)
+        report(model_start, f'Generating with {model}...', i, 'Starting...')
+        
+        try:
+            content = call_model(model, prompt_body, scenario, api_key)
+            report(model_start + (model_end - model_start) // 2, f'Parsing {model} response...', i, 'Parsing...')
+            
+            parsed_files = parse_files_from_content(content)
+
+            # Convert list of (filename, content) to dict
+            files_dict = {}
+            for filename, file_content in parsed_files:
+                safe_name = re.sub(r"[^a-zA-Z0-9_.-]+", "_", filename).strip("_")
+                files_dict[safe_name] = file_content
+
+            results[scenario_slug][model_slug] = files_dict
+            report(model_end, f'{model} complete!', i, 'Complete')
+            
+        except Exception as e:
+            report(model_end, f'{model} failed: {str(e)}', i, f'Error: {str(e)[:50]}')
+            raise
+
+    report(95, 'Creating download package...')
+    return results
+
