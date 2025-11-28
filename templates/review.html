@@ -432,14 +432,32 @@
             }
         });
         
+        // Generate filename: company-campaign-date
+        function generateFilename(suffix = '') {
+            const company = orchestrationResult?.brand_analysis?.company_name || 'company';
+            const campaign = orchestrationResult?.offer?.headline || 'journey';
+            const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            
+            // Slugify: lowercase, replace spaces/special chars with dashes
+            const slugify = (str) => str
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .substring(0, 30); // Limit length
+            
+            const base = `${slugify(company)}-${slugify(campaign)}-${date}`;
+            return suffix ? `${base}${suffix}` : base;
+        }
+        
         // Download brief
         document.getElementById('download-brief-btn').addEventListener('click', async () => {
+            const filename = generateFilename('-brief.md');
             const response = await fetch('/api/save-brief', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     brief: editor.value,
-                    filename: 'journey_brief.md'
+                    filename: filename
                 })
             });
             
@@ -448,7 +466,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'journey_brief.md';
+                a.download = filename;
                 a.click();
                 URL.revokeObjectURL(url);
             }
@@ -456,12 +474,13 @@
         
         // Download as prompt
         document.getElementById('download-prompt-btn').addEventListener('click', async () => {
+            const filename = generateFilename('-PROMPT.md');
             const response = await fetch('/api/brief-to-prompt', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     brief: editor.value,
-                    filename: 'PROMPT_orchestrated.md'
+                    filename: filename
                 })
             });
             
@@ -470,7 +489,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'PROMPT_orchestrated.md';
+                a.download = filename;
                 a.click();
                 URL.revokeObjectURL(url);
             }
@@ -478,13 +497,14 @@
         
         // Generate journey
         document.getElementById('generate-btn').addEventListener('click', async () => {
+            const filename = generateFilename('-PROMPT.md');
             // Download the prompt file first
             const response = await fetch('/api/brief-to-prompt', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     brief: editor.value,
-                    filename: 'PROMPT_orchestrated.md'
+                    filename: filename
                 })
             });
             
@@ -493,7 +513,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'PROMPT_orchestrated.md';
+                a.download = filename;
                 a.click();
                 URL.revokeObjectURL(url);
                 

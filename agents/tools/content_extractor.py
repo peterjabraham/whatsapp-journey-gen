@@ -6,11 +6,15 @@ and assets that feed into WhatsApp journey creation.
 """
 
 import re
+import sys
 import json
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field, asdict
 import requests
 from bs4 import BeautifulSoup
+
+# Increase recursion limit for complex HTML parsing
+sys.setrecursionlimit(5000)
 
 
 # ============================================================================
@@ -147,7 +151,7 @@ def extract_from_url(url: str, timeout: int = 15) -> ExtractedContent:
     
     try:
         response = requests.get(url, timeout=timeout, headers={
-            'User-Agent': 'Mozilla/5.0 (compatible; JourneyBot/1.0)'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
         })
         response.raise_for_status()
         html = response.text
@@ -155,7 +159,17 @@ def extract_from_url(url: str, timeout: int = 15) -> ExtractedContent:
         result.raw_text = f"Error fetching URL: {str(e)}"
         return result
     
-    soup = BeautifulSoup(html, 'html.parser')
+    # Try lxml first (more robust), fall back to html.parser
+    try:
+        soup = BeautifulSoup(html, 'lxml')
+    except Exception:
+        try:
+            soup = BeautifulSoup(html, 'html.parser')
+        except RecursionError:
+            # If parsing fails, extract text with regex fallback
+            result.raw_text = re.sub(r'<[^>]+>', ' ', html)[:5000]
+            result.value_proposition.headline = "Content extraction limited"
+            return result
     
     # Extract value proposition
     result.value_proposition = _extract_value_prop(soup)

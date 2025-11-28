@@ -279,6 +279,53 @@
             to { transform: rotate(360deg); }
         }
         
+        /* Progress Bar Styles */
+        .progress-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), #10b981);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-percent {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent);
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        .current-status {
+            text-align: center;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        
+        .progress-section .card h3 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
         .nav-links {
             display: flex;
             gap: 20px;
@@ -413,7 +460,22 @@
         <!-- Progress Section -->
         <div class="progress-section" id="progress-section">
             <div class="card">
-                <h3>Processing...</h3>
+                <h3 id="progress-title">Processing...</h3>
+                
+                <!-- Progress Bar -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar">
+                        <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                    </div>
+                    <div class="progress-percent" id="progress-percent">0%</div>
+                </div>
+                
+                <!-- Current Status -->
+                <div class="current-status" id="current-status">
+                    Initializing...
+                </div>
+                
+                <!-- Step List -->
                 <div class="progress-steps" id="progress-steps">
                     <div class="progress-step" data-step="extract">
                         <div class="step-icon">1</div>
@@ -550,7 +612,7 @@
             toggle.querySelector('span').textContent = content.classList.contains('show') ? '▼' : '▶';
         });
         
-        // Form submission
+        // Form submission with SSE progress
         document.getElementById('orchestrate-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -562,69 +624,159 @@
                 formData.append('pdfs', file);
             });
             
-            // Show progress
+            // Show progress section
             document.getElementById('progress-section').classList.add('active');
             document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').textContent = 'Processing...';
             
-            // Reset progress steps
+            // Reset UI
             document.querySelectorAll('.progress-step').forEach(step => {
                 step.classList.remove('active', 'complete', 'error');
             });
+            updateProgress(0, 'Starting...');
             
-            // Simulate progress (since we can't get real-time updates without WebSocket)
-            const steps = ['extract', 'brand', 'audience', 'offer', 'merge'];
-            let currentStep = 0;
+            // Track completed steps
+            const completedSteps = new Set();
+            let lastStep = null;
             
-            const progressInterval = setInterval(() => {
-                if (currentStep < steps.length) {
-                    if (currentStep > 0) {
-                        document.querySelector(`[data-step="${steps[currentStep-1]}"]`).classList.remove('active');
-                        document.querySelector(`[data-step="${steps[currentStep-1]}"]`).classList.add('complete');
+            function updateProgress(percent, message) {
+                document.getElementById('progress-bar-fill').style.width = percent + '%';
+                document.getElementById('progress-percent').textContent = percent + '%';
+                document.getElementById('current-status').textContent = message;
+            }
+            
+            function markStepActive(stepName) {
+                // Complete previous step
+                if (lastStep && lastStep !== stepName) {
+                    const prevEl = document.querySelector(`[data-step="${lastStep}"]`);
+                    if (prevEl) {
+                        prevEl.classList.remove('active');
+                        prevEl.classList.add('complete');
                     }
-                    document.querySelector(`[data-step="${steps[currentStep]}"]`).classList.add('active');
-                    currentStep++;
+                    completedSteps.add(lastStep);
                 }
-            }, 1500);
+                
+                // Activate current step
+                const stepEl = document.querySelector(`[data-step="${stepName}"]`);
+                if (stepEl && !completedSteps.has(stepName)) {
+                    stepEl.classList.add('active');
+                    lastStep = stepName;
+                }
+            }
             
+            function markAllComplete() {
+                document.querySelectorAll('.progress-step').forEach(step => {
+                    step.classList.remove('active');
+                    step.classList.add('complete');
+                });
+            }
+            
+            function showError(message) {
+                document.getElementById('progress-title').textContent = 'Error';
+                document.getElementById('current-status').textContent = message;
+                document.getElementById('current-status').style.background = 'rgba(239, 68, 68, 0.2)';
+                document.getElementById('current-status').style.color = '#ef4444';
+                
+                if (lastStep) {
+                    const stepEl = document.querySelector(`[data-step="${lastStep}"]`);
+                    if (stepEl) {
+                        stepEl.classList.remove('active');
+                        stepEl.classList.add('error');
+                    }
+                }
+                
+                document.getElementById('submit-btn').disabled = false;
+                document.getElementById('submit-btn').textContent = 'Try Again';
+            }
+            
+            // Try SSE first, fall back to regular POST if SSE not supported
             try {
-                const response = await fetch('/api/orchestrate', {
+                // Use regular POST (SSE requires special handling)
+                const response = await fetch('/api/orchestrate/stream', {
                     method: 'POST',
                     body: formData
                 });
                 
-                clearInterval(progressInterval);
+                if (!response.ok) {
+                    const error = await response.json();
+                    showError(error.error || 'Request failed');
+                    return;
+                }
                 
-                const result = await response.json();
+                // Read SSE stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
                 
-                if (response.ok && result.status !== 'error') {
-                    // Mark all steps complete
-                    document.querySelectorAll('.progress-step').forEach(step => {
-                        step.classList.remove('active');
-                        step.classList.add('complete');
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Process complete events
+                    const lines = buffer.split('\n\n');
+                    buffer = lines.pop() || ''; // Keep incomplete data
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const event = JSON.parse(line.slice(6));
+                                
+                                if (event.type === 'progress') {
+                                    updateProgress(event.percent, event.message);
+                                    markStepActive(event.step);
+                                } else if (event.type === 'complete') {
+                                    updateProgress(100, 'Complete!');
+                                    markAllComplete();
+                                    document.getElementById('progress-title').textContent = 'Complete!';
+                                    
+                                    // Store result and redirect
+                                    sessionStorage.setItem('orchestration_result', JSON.stringify(event.result));
+                                    setTimeout(() => {
+                                        window.location.href = '/review';
+                                    }, 800);
+                                    return;
+                                } else if (event.type === 'error') {
+                                    showError(event.message);
+                                    return;
+                                }
+                                // Ignore heartbeat
+                            } catch (e) {
+                                console.error('Parse error:', e);
+                            }
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('SSE error, falling back to regular POST:', error);
+                
+                // Fallback to regular POST
+                try {
+                    updateProgress(10, 'Processing (fallback mode)...');
+                    
+                    const response = await fetch('/api/orchestrate', {
+                        method: 'POST',
+                        body: formData
                     });
                     
-                    // Store result and redirect to review
-                    sessionStorage.setItem('orchestration_result', JSON.stringify(result));
-                    setTimeout(() => {
-                        window.location.href = '/review';
-                    }, 500);
-                } else {
-                    // Show error
-                    document.querySelectorAll('.progress-step.active').forEach(step => {
-                        step.classList.remove('active');
-                        step.classList.add('error');
-                        step.querySelector('.step-message').textContent = result.error || 'An error occurred';
-                    });
-                    document.getElementById('submit-btn').disabled = false;
+                    const result = await response.json();
+                    
+                    if (response.ok && result.status !== 'error') {
+                        updateProgress(100, 'Complete!');
+                        markAllComplete();
+                        sessionStorage.setItem('orchestration_result', JSON.stringify(result));
+                        setTimeout(() => {
+                            window.location.href = '/review';
+                        }, 500);
+                    } else {
+                        showError(result.error || 'An error occurred');
+                    }
+                } catch (fallbackError) {
+                    showError(fallbackError.message);
                 }
-            } catch (error) {
-                clearInterval(progressInterval);
-                document.querySelectorAll('.progress-step.active').forEach(step => {
-                    step.classList.remove('active');
-                    step.classList.add('error');
-                    step.querySelector('.step-message').textContent = error.message;
-                });
-                document.getElementById('submit-btn').disabled = false;
             }
         });
     </script>

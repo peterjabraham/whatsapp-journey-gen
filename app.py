@@ -1,15 +1,30 @@
 """
 Flask web application for WhatsApp Journey Generator.
+
+NOTE: When running with gunicorn + gevent workers, the wsgi.py file handles
+gevent monkey patching BEFORE imports. This app.py does NOT do monkey patching
+to avoid RecursionError issues during development.
 """
+import sys
+# Increase recursion limit for complex HTML parsing
+sys.setrecursionlimit(10000)
+
 import os
 import json
 import zipfile
 import io
 import re
+import time
+import queue
+import threading
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, Response, stream_with_context
+from dotenv import load_dotenv
 from journey_generator import generate_journeys
 from prompt_builder import generate_prompt_markdown
+
+# Load environment variables
+load_dotenv()
 
 # Import orchestrator (optional - may not be installed yet)
 try:
@@ -18,12 +33,8 @@ try:
 except ImportError:
     ORCHESTRATOR_AVAILABLE = False
 
-# Monkey patch for gevent compatibility (if using gevent workers)
-try:
-    from gevent import monkey
-    monkey.patch_all()
-except ImportError:
-    pass  # gevent not installed, skip monkey patching
+# NOTE: Gevent monkey patching removed from here - it was causing RecursionError
+# when importing after ssl. For production, use wsgi.py which patches first.
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
@@ -325,6 +336,147 @@ def run_orchestration():
         
     except Exception as e:
         return jsonify({"error": f"Orchestration failed: {str(e)}"}), 500
+
+
+# Store for SSE progress (simple in-memory, keyed by session)
+_progress_queues = {}
+
+
+@app.route('/api/orchestrate/stream', methods=['POST'])
+def run_orchestration_stream():
+    """
+    Run orchestration with Server-Sent Events (SSE) for real-time progress.
+    
+    Returns a stream of events:
+    - progress: {step, message, percent}
+    - complete: {result}
+    - error: {message}
+    """
+    if not ORCHESTRATOR_AVAILABLE:
+        return jsonify({
+            "error": "Orchestrator not available"
+        }), 500
+    
+    # Parse form data
+    urls = request.form.getlist('urls[]')
+    urls = [u.strip() for u in urls if u.strip()]
+    
+    pdf_files = []
+    if 'pdfs' in request.files:
+        for pdf in request.files.getlist('pdfs'):
+            if pdf.filename and pdf.filename.endswith('.pdf'):
+                pdf_files.append((pdf.filename, pdf.read()))
+    
+    if not urls and not pdf_files:
+        return jsonify({"error": "Please provide at least one URL or PDF"}), 400
+    
+    journey_type = request.form.get('journey_type', 'B2C')
+    if journey_type not in ['B2B', 'B2C']:
+        journey_type = 'B2C'
+    
+    user_inputs = {}
+    user_inputs_json = request.form.get('user_inputs', '{}')
+    try:
+        user_inputs = json.loads(user_inputs_json)
+    except json.JSONDecodeError:
+        pass
+    
+    if request.form.get('company_name'):
+        user_inputs['company_name'] = request.form.get('company_name')
+    if request.form.get('offer_headline'):
+        user_inputs.setdefault('offer', {})['headline'] = request.form.get('offer_headline')
+    if request.form.get('discount_code'):
+        user_inputs.setdefault('offer', {})['discount_code'] = request.form.get('discount_code')
+    if request.form.get('timing_strategy'):
+        user_inputs.setdefault('timing', {})['strategy'] = request.form.get('timing_strategy')
+    
+    use_llm = request.form.get('use_llm', 'false').lower() == 'true'
+    
+    # Create a queue for progress updates
+    progress_queue = queue.Queue()
+    
+    # Progress steps with percentages
+    PROGRESS_STEPS = {
+        'extract': 20,
+        'brand': 40,
+        'audience': 60,
+        'offer': 80,
+        'merge': 95,
+        'complete': 100,
+    }
+    
+    def progress_callback(step: str, message: str):
+        """Callback that the orchestrator calls for each step."""
+        percent = PROGRESS_STEPS.get(step, 50)
+        progress_queue.put({
+            'type': 'progress',
+            'step': step,
+            'message': message,
+            'percent': percent
+        })
+    
+    def run_orchestrator():
+        """Run orchestrator in a thread."""
+        try:
+            orchestrator = Orchestrator()
+            orchestrator.on_progress = progress_callback
+            
+            if use_llm:
+                result = orchestrator.run_with_llm_reasoning(
+                    urls=urls,
+                    pdf_files=pdf_files,
+                    journey_type=journey_type,
+                    user_inputs=user_inputs
+                )
+            else:
+                result = orchestrator.run(
+                    urls=urls,
+                    pdf_files=pdf_files,
+                    journey_type=journey_type,
+                    user_inputs=user_inputs
+                )
+            
+            progress_queue.put({
+                'type': 'complete',
+                'result': result.to_dict()
+            })
+        except Exception as e:
+            progress_queue.put({
+                'type': 'error',
+                'message': str(e)
+            })
+    
+    # Start orchestrator in background thread
+    thread = threading.Thread(target=run_orchestrator)
+    thread.start()
+    
+    def generate_events():
+        """Generator for SSE events."""
+        while True:
+            try:
+                # Wait for progress update (timeout to keep connection alive)
+                event = progress_queue.get(timeout=30)
+                
+                # Format as SSE
+                yield f"data: {json.dumps(event)}\n\n"
+                
+                # If complete or error, stop
+                if event['type'] in ['complete', 'error']:
+                    break
+                    
+            except queue.Empty:
+                # Send heartbeat to keep connection alive
+                yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
+    
+    return Response(
+        stream_with_context(generate_events()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',  # Disable nginx buffering
+        }
+    )
 
 
 @app.route('/api/save-brief', methods=['POST'])
