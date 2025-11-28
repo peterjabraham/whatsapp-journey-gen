@@ -76,6 +76,7 @@
             color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             font-size: 13px;
+            transition: all 0.2s;
         }
         
         .editor-toolbar button:hover {
@@ -86,6 +87,34 @@
         .editor-toolbar button.active {
             background: var(--accent);
             color: #ffffff;
+        }
+        
+        /* Edit button - Red */
+        .editor-toolbar #edit-btn {
+            background: #ef4444;
+            color: #ffffff;
+        }
+        
+        .editor-toolbar #edit-btn:hover {
+            background: #dc2626;
+        }
+        
+        .editor-toolbar #edit-btn.active {
+            background: #b91c1c;
+        }
+        
+        /* Preview button - Green */
+        .editor-toolbar #preview-btn {
+            background: #10b981;
+            color: #ffffff;
+        }
+        
+        .editor-toolbar #preview-btn:hover {
+            background: #059669;
+        }
+        
+        .editor-toolbar #preview-btn.active {
+            background: #047857;
         }
         
         .markdown-editor {
