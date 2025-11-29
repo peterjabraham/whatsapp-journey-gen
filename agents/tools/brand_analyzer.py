@@ -138,6 +138,8 @@ def _determine_personality(industry: str, tone: List[str]) -> List[str]:
         'healthcare': ['caring', 'professional', 'supportive'],
         'education': ['knowledgeable', 'encouraging', 'patient'],
         'real estate': ['local expert', 'trustworthy', 'responsive'],
+        'grant management': ['innovative', 'caring', 'solution-oriented', 'impact-focused'],
+        'marketing automation': ['innovative', 'smart', 'results-driven'],
     }
     
     traits.extend(industry_traits.get(industry, ['professional', 'helpful']))
@@ -200,6 +202,8 @@ def _determine_target_emotion(industry: str) -> str:
         'healthcare': 'reassurance',
         'education': 'aspiration',
         'real estate': 'trust',
+        'grant management': 'empowerment',
+        'marketing automation': 'confidence',
     }
     
     return emotion_map.get(industry, 'trust')

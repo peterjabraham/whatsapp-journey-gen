@@ -250,9 +250,9 @@ The `extract_from_text()` function now extracts all attributes:
 
 | Attribute | Detection Method | Status |
 |-----------|------------------|--------|
-| `value_proposition.headline` | Title detection, skip headers/page nums | ✓ |
+| `value_proposition.headline` | Value prop patterns + title detection | ✓ |
 | `value_proposition.subheadline` | Second substantial line | ✓ |
-| `value_proposition.key_benefits` | Bullet points, numbered lists | ✓ |
+| `value_proposition.key_benefits` | Bullet points, numbered lists, action verbs | ✓ |
 | `product.name` | Filename + text patterns ("Introducing X") | ✓ |
 | `product.description` | First paragraph (50-500 chars) | ✓ |
 | `product.features` | Bullet points, feature keywords | ✓ |
@@ -263,13 +263,28 @@ The `extract_from_text()` function now extracts all attributes:
 | `ctas.primary` | "Apply/Sign up/Get started" patterns | ✓ |
 | `ctas.secondary` | "Learn more/Find out" patterns | ✓ |
 | `ctas.urls` | URL extraction + categorization | ✓ |
-| `brand.name` | ©/trademark patterns, filename | ✓ |
+| `brand.name` | ©/trademark patterns, filename (cleaned) | ✓ |
 | `brand.colors` | Hex code patterns | ✓ |
 | `brand.tone_keywords` | Keyword frequency analysis | ✓ |
-| `brand.industry` | Industry keyword patterns (8 industries) | ✓ |
+| `brand.industry` | Industry keyword patterns (10 industries) | ✓ |
 | `assets.pdfs` | .pdf URLs, file references | ✓ |
 | `assets.videos` | Video URLs (youtube/vimeo/.mp4) | ✓ |
 | `assets.images` | Image URLs (.jpg/.png etc) | ✓ |
+
+## Industry Detection Keywords
+
+| Industry | Keywords (match threshold) |
+|----------|---------------------------|
+| `financial services` | isa, savings, investment, pension, mortgage, insurance, bank, finance, loan, credit, tax-free, bonus (≥2) |
+| `grant management` | grant, funding, funder, grantee, social value, impact, community, charity, nonprofit, foundation, philanthropy, csr, giving (≥1) |
+| `saas` | software, platform, dashboard, integration, api, automate, cloud, subscription, workflow, streamline (≥2) |
+| `e-commerce` | shop, cart, checkout, delivery, shipping, buy now, order, product, store (≥2) |
+| `healthcare` | health, medical, doctor, patient, clinic, treatment, wellness, care, therapy (≥2) |
+| `education` | learn, course, training, certificate, student, education, teach, degree, curriculum (≥2) |
+| `real estate` | property, home, house, rent, estate, mortgage, apartment, landlord (≥2) |
+| `recruitment` | job, career, hire, recruit, candidate, employer, vacancy, talent (≥2) |
+| `travel` | travel, hotel, flight, booking, vacation, holiday, destination, tourism (≥2) |
+| `marketing automation` | marketing, campaign, engagement, automation, crm, email, whatsapp, journey (≥2) |
 
 ## Extraction Schema Reference
 

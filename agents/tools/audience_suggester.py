@@ -300,6 +300,47 @@ def _suggest_segments_for_industry(
                 ),
             ],
         },
+        'grant management': {
+            'B2B': [
+                AudienceSegment(
+                    name="Grant-Making Organizations",
+                    type="B2B",
+                    description="Foundations, trusts, and corporate CSR teams managing grant programs",
+                    job_titles=["Program Manager", "Grants Officer", "Foundation Director", "CSR Manager"],
+                    company_size="10-500 employees",
+                    awareness_level="problem-aware",
+                    buying_stage="consideration",
+                    pain_points=["Drowning in spreadsheets", "Manual application reviews", "Can't track impact", "Too much admin time"],
+                    goals=["Streamline grant management", "Track social value", "Reduce admin burden", "Better funding decisions"],
+                    motivations=["Create more impact", "Work smarter not harder"],
+                ),
+                AudienceSegment(
+                    name="Community Organizations",
+                    type="B2B",
+                    description="Nonprofits and charities seeking funding and managing grants received",
+                    job_titles=["Executive Director", "Fundraising Manager", "Development Officer"],
+                    company_size="1-50 employees",
+                    awareness_level="solution-aware",
+                    buying_stage="consideration",
+                    pain_points=["Complex application processes", "Reporting requirements", "Finding funding opportunities"],
+                    goals=["Win more grants", "Simplify reporting", "Build funder relationships"],
+                    motivations=["Secure funding", "Focus on mission"],
+                ),
+            ],
+            'B2C': [
+                AudienceSegment(
+                    name="Productivity Seekers",
+                    type="B2C",
+                    description="Individuals seeking to streamline grant-related work",
+                    age_range="25-45",
+                    awareness_level="problem-aware",
+                    buying_stage="consideration",
+                    pain_points=["Too many tasks", "Disorganized workflows", "Overwhelmed by complexity"],
+                    goals=["Get organized", "Save time", "Reduce stress"],
+                    motivations=["Efficiency", "Work-life balance"],
+                ),
+            ],
+        },
     }
     
     # Get segments for this industry and journey type

@@ -539,18 +539,32 @@ def _extract_value_prop_from_text(lines: List[str], full_text: str) -> ValueProp
     """Extract value proposition from text content."""
     vp = ValueProposition()
     
+    # Look for explicit value proposition patterns first
+    value_prop_patterns = [
+        r'(?:the|our)\s+(?:platform|solution|system)\s+(?:that|for)\s+(.{20,150})',
+        r'(?:revolutioni[sz]ing|transforming|streamlining)\s+(.{15,100})',
+        r'(?:help(?:s|ing)?|enable(?:s|ing)?)\s+(?:you|organizations?|teams?|companies?)\s+(.{15,100})',
+    ]
+    
+    for pattern in value_prop_patterns:
+        match = re.search(pattern, full_text, re.I)
+        if match:
+            vp.headline = match.group(0).strip()
+            break
+    
     # Headline: First substantial line that looks like a title
-    for i, line in enumerate(lines[:10]):
-        # Skip very short lines or lines that look like headers/page numbers
-        if len(line) < 10 or len(line) > 150:
-            continue
-        if re.match(r'^(page\s*\d+|table of contents|\d+\.)', line.lower()):
-            continue
-        # Skip lines that are all caps (likely section headers)
-        if line.isupper() and len(line) > 30:
-            continue
-        vp.headline = line
-        break
+    if not vp.headline:
+        for i, line in enumerate(lines[:10]):
+            # Skip very short lines or lines that look like headers/page numbers
+            if len(line) < 10 or len(line) > 150:
+                continue
+            if re.match(r'^(page\s*\d+|table of contents|\d+\.)', line.lower()):
+                continue
+            # Skip lines that are all caps (likely section headers)
+            if line.isupper() and len(line) > 30:
+                continue
+            vp.headline = line
+            break
     
     # Subheadline: Second substantial line or first paragraph-like content
     found_headline = False
@@ -567,13 +581,14 @@ def _extract_value_prop_from_text(lines: List[str], full_text: str) -> ValueProp
     benefit_patterns = [
         r'(?:•|-|\*|✓|✔|→|►)\s*(.{15,150})',  # Bullet points
         r'(?:benefit|advantage|feature)s?:\s*(.{15,150})',  # Labeled benefits
+        r'(?:save|reduce|streamline|automate|simplify|track|manage)\s+(.{10,100})',  # Action-oriented benefits
     ]
     
     for pattern in benefit_patterns:
         matches = re.findall(pattern, full_text, re.I | re.M)
         for match in matches:
             cleaned = match.strip().rstrip('.')
-            if cleaned and cleaned not in benefits:
+            if cleaned and cleaned not in benefits and len(cleaned) > 10:
                 benefits.append(cleaned)
     
     # Also check for numbered lists
@@ -772,10 +787,13 @@ def _extract_brand_from_text(lines: List[str], full_text: str, source_name: str)
         r'([A-Z][A-Za-z]+(?:\s+[A-Z][a-z]+)?)\s*(?:is|are)\s+(?:a|an|the)\s+(?:leading|trusted|premier)',
         r'(?:about|welcome to)\s+([A-Z][A-Za-z\s&]{2,30})',
         r'([A-Z][A-Za-z]+)\s+(?:©|®|™)',
+        # Additional patterns for product names
+        r'(?:introducing|discover|welcome to)\s+([A-Z][A-Za-z\s]+)',
+        r'^([A-Z][A-Za-z]+(?:\s+[A-Z][a-z]+)?)\s*$',  # Standalone title line
     ]
     
     for pattern in name_patterns:
-        match = re.search(pattern, full_text)
+        match = re.search(pattern, full_text, re.M)
         if match:
             name = match.group(1).strip()
             if 2 < len(name) < 40:
@@ -785,10 +803,12 @@ def _extract_brand_from_text(lines: List[str], full_text: str, source_name: str)
     # Fallback to filename
     if not brand.name:
         name_from_file = re.sub(r'[_-]', ' ', source_name.rsplit('.', 1)[0])
-        # Take first part if it looks like a company name
+        # Clean up common prefixes/suffixes
+        name_from_file = re.sub(r'\s*(guide|brochure|overview|info|document)\s*$', '', name_from_file, flags=re.I)
         parts = name_from_file.split()
-        if parts and parts[0][0].isupper():
-            brand.name = parts[0]
+        if parts:
+            # Take first 2-3 words that look like a name
+            brand.name = ' '.join(parts[:3]).strip()
     
     # Colors: Look for hex codes or color mentions (rare in PDFs)
     hex_pattern = r'#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})(?![0-9A-Fa-f])'
@@ -800,8 +820,8 @@ def _extract_brand_from_text(lines: List[str], full_text: str, source_name: str)
     tone_indicators = {
         'professional': ['professional', 'expert', 'trusted', 'reliable', 'established', 'quality'],
         'friendly': ['friendly', 'easy', 'simple', 'fun', 'enjoy', 'love', 'happy'],
-        'innovative': ['innovative', 'cutting-edge', 'modern', 'advanced', 'smart', 'technology'],
-        'caring': ['caring', 'support', 'help', 'understand', 'family', 'community', 'together'],
+        'innovative': ['innovative', 'cutting-edge', 'modern', 'advanced', 'smart', 'technology', 'revolutionising', 'transforming'],
+        'caring': ['caring', 'support', 'help', 'understand', 'family', 'community', 'together', 'impact', 'social'],
         'premium': ['premium', 'luxury', 'exclusive', 'elite', 'bespoke', 'exceptional'],
         'secure': ['secure', 'safe', 'protected', 'regulated', 'compliant', 'trusted'],
     }
@@ -813,16 +833,18 @@ def _extract_brand_from_text(lines: List[str], full_text: str, source_name: str)
     if not brand.tone_keywords:
         brand.tone_keywords = ['professional']
     
-    # Industry detection
+    # Industry detection - EXPANDED with more specific patterns
     industry_indicators = {
-        'financial services': ['isa', 'savings', 'investment', 'pension', 'mortgage', 'insurance', 'bank', 'finance', 'loan', 'credit'],
-        'e-commerce': ['shop', 'cart', 'checkout', 'delivery', 'shipping', 'buy now', 'order', 'product'],
-        'saas': ['software', 'platform', 'dashboard', 'integration', 'api', 'automate', 'cloud', 'subscription'],
-        'healthcare': ['health', 'medical', 'doctor', 'patient', 'clinic', 'treatment', 'wellness', 'care'],
-        'education': ['learn', 'course', 'training', 'certificate', 'student', 'education', 'teach', 'degree'],
-        'real estate': ['property', 'home', 'house', 'rent', 'estate', 'mortgage', 'apartment'],
-        'recruitment': ['job', 'career', 'hire', 'recruit', 'candidate', 'employer', 'vacancy'],
-        'travel': ['travel', 'hotel', 'flight', 'booking', 'vacation', 'holiday', 'destination'],
+        'financial services': ['isa', 'savings', 'investment', 'pension', 'mortgage', 'insurance', 'bank', 'finance', 'loan', 'credit', 'tax-free', 'bonus'],
+        'e-commerce': ['shop', 'cart', 'checkout', 'delivery', 'shipping', 'buy now', 'order', 'product', 'store'],
+        'saas': ['software', 'platform', 'dashboard', 'integration', 'api', 'automate', 'cloud', 'subscription', 'workflow', 'streamline'],
+        'grant management': ['grant', 'funding', 'funder', 'grantee', 'social value', 'impact', 'community', 'charity', 'nonprofit', 'foundation', 'philanthropy', 'csr', 'giving'],
+        'healthcare': ['health', 'medical', 'doctor', 'patient', 'clinic', 'treatment', 'wellness', 'care', 'therapy'],
+        'education': ['learn', 'course', 'training', 'certificate', 'student', 'education', 'teach', 'degree', 'curriculum'],
+        'real estate': ['property', 'home', 'house', 'rent', 'estate', 'mortgage', 'apartment', 'landlord'],
+        'recruitment': ['job', 'career', 'hire', 'recruit', 'candidate', 'employer', 'vacancy', 'talent'],
+        'travel': ['travel', 'hotel', 'flight', 'booking', 'vacation', 'holiday', 'destination', 'tourism'],
+        'marketing automation': ['marketing', 'campaign', 'engagement', 'automation', 'crm', 'email', 'whatsapp', 'journey'],
     }
     
     best_industry = 'general business'
@@ -834,7 +856,15 @@ def _extract_brand_from_text(lines: List[str], full_text: str, source_name: str)
             best_score = score
             best_industry = industry
     
-    brand.industry = best_industry if best_score >= 2 else 'general business'
+    # Require only 1 match for very specific industries
+    specific_industries = ['grant management', 'marketing automation']
+    if best_industry in specific_industries and best_score >= 1:
+        brand.industry = best_industry
+    elif best_score >= 2:
+        brand.industry = best_industry
+    else:
+        brand.industry = 'general business'
+    
     return brand
 
 
