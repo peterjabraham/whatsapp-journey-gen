@@ -94,22 +94,79 @@ Last updated: 2024-11-28
                     ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                         ORCHESTRATOR PIPELINE                                 │
+│                                                                              │
+│   *** POST-EXTRACTION PROCESSING IS IDENTICAL FOR URL AND PDF ***            │
+│                                                                              │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│  Step 1: EXTRACT    Step 2: BRAND      Step 3: AUDIENCE   Step 4: OFFER     │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐  │
-│  │Merge sources │──▶│analyze_brand │──▶│suggest_     │──▶│generate_     │  │
-│  │URL + PDF     │   │(name, colors,│   │audiences    │   │offer_markdown│  │
-│  │extractions   │   │ tone, industry)  │(B2B/B2C     │   │(headline,    │  │
-│  └──────────────┘   └──────────────┘   │ segments)   │   │ discount,    │  │
-│                                        └──────────────┘   │ timeline)    │  │
-│                                                           └──────────────┘  │
+│  Both URL and PDF produce ExtractedContent → SAME downstream processing:     │
 │                                                                              │
-│  Step 5: MERGE                                                               │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │ INPUT: ExtractedContent (from URL or PDF - identical structure)      │   │
+│  │   • value_proposition: headline, subheadline, key_benefits           │   │
+│  │   • product: name, description, features, outcomes                   │   │
+│  │   • social_proof: testimonials, stats, trust_badges                  │   │
+│  │   • ctas: primary, secondary, urls                                   │   │
+│  │   • brand: name, colors, tone_keywords, industry                     │   │
+│  │   • assets: pdfs, videos, images                                     │   │
+│  └────────────────────────────┬─────────────────────────────────────────┘   │
+│                               │                                              │
+│                               ▼                                              │
+│  Step 1: MERGE SOURCES (if multiple URLs/PDFs)                              │
 │  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                    merge_to_brief()                                     │ │
-│  │   Combines: brand_md + audience_md + offer_md + platform_config        │ │
-│  │   Output: 4_combined_brief.md                                          │ │
+│  │  _extract_content() in orchestrator.py                                  │ │
+│  │  • Primary source = first extraction (URL or PDF)                      │ │
+│  │  • Supplement missing fields from additional sources                   │ │
+│  │  • Extend list fields (benefits, features, testimonials, stats)       │ │
+│  │  • Deduplicate and limit (max 5 benefits, 10 features, etc.)          │ │
+│  │  OUTPUT: Single merged ExtractedContent                                │ │
+│  └────────────────────────────┬───────────────────────────────────────────┘ │
+│                               │                                              │
+│                               ▼                                              │
+│  Step 2: BRAND ANALYSIS                                                      │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  analyze_brand(extracted.to_dict()) → BrandAnalysis                    │ │
+│  │  INPUT: ExtractedContent.brand, value_proposition, product             │ │
+│  │  OUTPUT:                                                               │ │
+│  │    • company_name, industry                                            │ │
+│  │    • tone[], formality_level, personality_traits[]                     │ │
+│  │    • primary_color, accent_color, background_color                     │ │
+│  │    • key_phrases[], words_to_avoid[], emoji_recommendation             │ │
+│  │    • value_statement, differentiators[], target_emotion                │ │
+│  └────────────────────────────┬───────────────────────────────────────────┘ │
+│                               │                                              │
+│                               ▼                                              │
+│  Step 3: AUDIENCE SUGGESTION                                                 │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  suggest_audiences(extracted.to_dict(), journey_type) → AudienceSugg   │ │
+│  │  INPUT: ExtractedContent.brand.industry, product.name, key_benefits    │ │
+│  │  OUTPUT:                                                               │ │
+│  │    • journey_type (B2B/B2C)                                            │ │
+│  │    • segments[]: AudienceSegment (name, description, demographics,     │ │
+│  │                  pain_points[], goals[], awareness_level, buying_stage)│ │
+│  │    • recommended_paths, segmentation_question                          │ │
+│  └────────────────────────────┬───────────────────────────────────────────┘ │
+│                               │                                              │
+│                               ▼                                              │
+│  Step 4: OFFER GENERATION                                                    │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  generate_offer_markdown(headline, discount, timeline, timing)         │ │
+│  │  INPUT: value_proposition.headline + user_inputs                       │ │
+│  │  OUTPUT: Markdown with:                                                │ │
+│  │    • Offer details (headline, discount_code, valid_until, terms)      │ │
+│  │    • Campaign timeline (start, end, duration)                         │ │
+│  │    • Message timing config (delays between steps)                     │ │
+│  │    • Journey structure (Day 0-3 overview)                             │ │
+│  └────────────────────────────┬───────────────────────────────────────────┘ │
+│                               │                                              │
+│                               ▼                                              │
+│  Step 5: MERGE TO BRIEF                                                      │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  merge_to_brief(brand_md, audience_md, offer_md, platform_config)     │ │
+│  │  OUTPUT: MergedBrief                                                   │ │
+│  │    • combined_markdown: Single document with all sections              │ │
+│  │    • Pre-generation checklist                                          │ │
+│  │    • Platform constraints (WATI character limits, etc.)               │ │
 │  └────────────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -139,6 +196,53 @@ Last updated: 2024-11-28
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
+
+## URL vs PDF Processing Comparison
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PROCESSING PATH COMPARISON                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   STEP              │   URL PATH              │   PDF PATH                  │
+│   ──────────────────┼─────────────────────────┼───────────────────────────  │
+│                     │                         │                             │
+│   1. INPUT          │ URL string              │ PDF file bytes              │
+│                     │                         │                             │
+│   2. RAW EXTRACT    │ HTTP GET + BeautifulSoup│ PyMuPDF → markdown text     │
+│                     │ (HTML parsing)          │                             │
+│                     │                         │                             │
+│   3. STRUCTURED     │ extract_from_url()      │ extract_from_text()         │
+│      EXTRACTION     │ (HTML-specific parsing) │ (text pattern matching)     │
+│                     │                         │                             │
+│   4. OUTPUT         │ ExtractedContent        │ ExtractedContent            │
+│      (IDENTICAL)    │ (same dataclass)        │ (same dataclass)            │
+│                     │                         │                             │
+│   ════════════════════════════════════════════════════════════════════════  │
+│   FROM HERE ON, PROCESSING IS 100% IDENTICAL:                               │
+│   ════════════════════════════════════════════════════════════════════════  │
+│                     │                         │                             │
+│   5. MERGE          │         ← _extract_content() merges both →            │
+│                     │                                                       │
+│   6. ANALYZE        │         ← analyze_brand(extracted.to_dict()) →        │
+│                     │                                                       │
+│   7. AUDIENCE       │         ← suggest_audiences(extracted.to_dict()) →    │
+│                     │                                                       │
+│   8. OFFER          │         ← generate_offer_markdown() →                 │
+│                     │                                                       │
+│   9. BRIEF          │         ← merge_to_brief() →                          │
+│                     │                                                       │
+│   10. REVIEW        │         ← User review/edit →                          │
+│                     │                                                       │
+│   11. GENERATE      │         ← Journey Generator (OpenRouter API) →        │
+│                     │                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Insight:** The ONLY difference is in steps 2-3 (raw extraction → structured data). 
+Steps 5-11 use the SAME code path regardless of input source.
+
+---
 
 ## PDF Extraction Methods (IMPLEMENTED)
 
